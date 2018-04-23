@@ -1,0 +1,17 @@
+## Folders to be ignored (only for galaxy tool)
+## doc/
+## test-data/
+codes/
+*.ibd
+
+## R History and session data files
+.RData
+.Rhistory
+.Rapp.history
+
+## Others
+.DS_Store
+*.swp
+*.*~
+#*#
+.#*
