@@ -2,6 +2,7 @@
 ## doc/
 ## test-data/
 codes/
+
 *.ibd
 
 ## R History and session data files
