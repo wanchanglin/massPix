@@ -142,8 +142,8 @@
            label="Choose an imzml composite file"
            help="imzml file contains imaging meta data. The imaging binary 
                  data file (*.ibd) contains the mass spectral data. The two
-                 files must be uploaded as a 'composite' data type via
-                 'Get Data'. " />
+                 files must be uploaded as an 'imzml' 'composite' data type 
+                 via 'Get Data'. " />
     
     <!-- wl-25-11-2017, Sat: imzML and ibd file must be uploaded and located 
          in the same directory. If so, no need to pass ibd file into R code

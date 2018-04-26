@@ -3,7 +3,8 @@
 This is Galaxy tool for R package `massPix` which processes high resolution
 mass spectrometry imaging data, performs multivariate statistics (PCA,
 clustering) and lipid identification. For details, see
-[massPix](https://github.com/hallz/massPix).
+[R package massPix](https://github.com/hallz/massPix) and [Metabolomics
+publication](https://link.springer.com/article/10.1007%2Fs11306-017-1252-5).
 
 ## Installation ##
 
@@ -12,8 +13,8 @@ You need to install [Galaxy](https://github.com/galaxyproject/galaxy) and
 
 - Install four R packages `optparse`, `WriteXLS`, `calibrate` and `rJava`
   inside R. 
-- Not install R package `massPix`. This tool embeds a modified `massPix`
-  package. Note that the modified `massPix` is for galaxy only.
+- Do not install R package `massPix`. This tool embeds a modified `massPix`
+  package for Galaxy only.
 - Use `git` to clone this tool
 
   ```bash
@@ -22,7 +23,7 @@ You need to install [Galaxy](https://github.com/galaxyproject/galaxy) and
 
 - Add this tool's location into Galaxy' tool config file:
   `~/Galaxy/config/tool_conf.xml`. For example, one simplified
-  `tool_conf.xml` is like:
+  `tool_conf.xml` looks like:
 
   ```xml
   <?xml version='1.0' encoding='utf-8'?>
@@ -39,6 +40,10 @@ You need to install [Galaxy](https://github.com/galaxyproject/galaxy) and
   </toolbox>
   ```
 
+- Download test data (.ibd and .imzML files) from the
+  [MetaboLights](https://www.ebi.ac.uk/metabolights/) repository accession
+  number [MTBLS487](https://www.ebi.ac.uk/metabolights/MTBLS487). 
+
 ## To-Do ##
 
 - Dependencies will be handled by CONDA. This includes all R packages used.
@@ -48,5 +53,5 @@ You need to install [Galaxy](https://github.com/galaxyproject/galaxy) and
 
 - Wanchang Lin (wl361@cam.ac.uk), University of Cambridge 
 - Zoe Hall (zlh22@cam.ac.uk), University of Cambridge 
-- Jules GriffinI (jlg40@cam.ac.uk), University of Cambridge 
+- Julian L Griffin (jlg40@cam.ac.uk), University of Cambridge 
 

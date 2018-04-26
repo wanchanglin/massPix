@@ -1,4 +1,5 @@
-rem wl-01-11-2017, Wed: Rscript test code. More test, see 'massPix.sh'
+rem wl-01-11-2017, Wed: Rscript test code for Windows. More test, see
+rem 'massPix.sh'
 
 Rscript --vanilla massPix.R ^
   --imzML_file "./test-data/test_POS.imzML" ^

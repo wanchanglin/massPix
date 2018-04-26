@@ -1,5 +1,5 @@
 #!/bin/bash
-# wl-01-11-2017, Wed: Rscript test code
+# wl-01-11-2017, Wed: Rscript test code for Linux
 
 Rscript --vanilla massPix.R \
   --imzML_file "./test-data/test_POS.imzML" \
