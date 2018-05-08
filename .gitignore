@@ -1,9 +1,9 @@
 ## Folders to be ignored (only for galaxy tool)
-## doc/
-## test-data/
 codes/
-*.imzML
-*.ibd
+
+# ignore imzML and ibd files recursively. 
+**.imzML
+**.ibd
 
 ## R History and session data files
 .RData
