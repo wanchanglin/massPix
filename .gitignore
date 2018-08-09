@@ -1,5 +1,6 @@
 ## Folders to be ignored (only for galaxy tool)
 codes/
+res/
 
 # ignore imzML and ibd files recursively. 
 **.imzML
