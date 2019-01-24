@@ -539,7 +539,7 @@
     <test>
       <param name="imzML_file" value="test_POS.imzML" />
       <param name="process_selector" value="FALSE" /> 
-      <param name="image_file" value="image_norm.tab" />
+      <param name="image_file" value="image_norm.tsv" />
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <output name="pca_out" file="pca.pdf" />
@@ -552,7 +552,7 @@
       <param name="pca_selector" value="FALSE" /> 
       <param name="slice_selector" value="TRUE" /> 
       <param name="cluster_selector" value="TRUE" /> 
-      <output name="image_out" value="image_norm.tab" />
+      <output name="image_out" value="image_norm.tsv" />
       <output name="rdata_out" value="R_running.rdata" />
       <output name="slice_out" file="slice.pdf" />
       <output name="clus_out" file="cluster.pdf" />

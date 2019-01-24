@@ -114,7 +114,7 @@ if(com_f){
 
         ## -----------------------------------------------------------------
         ## output parameters and files
-        make_option("--image_out",type="character", default="image.tab",
+        make_option("--image_out",type="character", default="image.tsv",
                     help="Processed imaging data visualisation"),
 
         make_option("--rdata", type="logical", default=TRUE),
@@ -149,7 +149,7 @@ if(com_f){
         make_option("--cluster_type",type="character", default = "kmeans"),
         make_option("--clusters",type="integer",default = 5),
         make_option("--intensity", type="logical", default=TRUE),
-        make_option("--intensity_out",type="character", default="intensity.tab")
+        make_option("--intensity_out",type="character", default="intensity.tsv")
     )
 
   opt <- parse_args(object=OptionParser(option_list=option_list),
@@ -164,7 +164,7 @@ if(com_f){
       ## -------------------------------------------------------------------
       ## input files. Note that using full path here.
       imzML_file = paste0(home_dir, "test-data/test_POS.imzML"),
-      image_file = paste0(home_dir, "test-data/image_norm.tab"),
+      image_file = paste0(home_dir, "test-data/image_norm.tsv"),
 
       ## -------------------------------------------------------------------
       ## image data processing parameters
@@ -200,7 +200,7 @@ if(com_f){
 
       ## -------------------------------------------------------------------
       ## output parameters and files
-      image_out = paste0(home_dir, "test-data/image.tab"),
+      image_out = paste0(home_dir, "test-data/image.tsv"),
 
       rdata     = TRUE,
       rdata_out = paste0(home_dir, "test-data/image.rdata"),
@@ -233,7 +233,7 @@ if(com_f){
       cluster_type = "kmeans",
       clusters     = 5,
       intensity    = TRUE,
-      intensity_out = paste0(home_dir, "test-data/intensity.tab")
+      intensity_out = paste0(home_dir, "test-data/intensity.tsv")
   )
 
 }
