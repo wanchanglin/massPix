@@ -303,6 +303,11 @@ imzML <- J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
 ## Three functions mzextractor, subsetImage and contructImage call
 ## J(spectrum, 'getIntensityArray'.
 
+## wl-25-11-2017, Sat: imzML and ibd file must be uploaded and located in
+## the same directory. If so, no need to pass ibd file into R code since
+## imzMLConverter will get ibd file implicitely based on the directory and
+## name of imzML file.
+
 x.cood <- J(imzML, 'getWidth')
 y.cood <- J(imzML, 'getHeight')
 

@@ -145,11 +145,6 @@
                  files must be uploaded as an 'imzml' 'composite' data type 
                  via 'Get Data'. " />
     
-    <!-- wl-25-11-2017, Sat: imzML and ibd file must be uploaded and located 
-         in the same directory. If so, no need to pass ibd file into R code
-         since imzMLConverter will get ibd file implicitely based on the 
-         directory and name of imzML file.  -->
-
     <conditional name="process">
       <param label="Process mass spectrometry imaging data"
              name="process_selector"
@@ -560,63 +555,99 @@
   </tests>
 
   <!-- =============================================================== -->
-  <help> <![CDATA[
-  .. class:: infomark
-  
-  **What it does**
+  <help>
+massPix
+=======
 
-  massPix_ processes high resolution mass spectrometry imaging data,
-  performs multivariate statistics (PCA, clustering) and lipid
-  identification.
+Description
+-----------
 
-  The overall data processing workflow consists of initial data
-  pre-processing, filtering, image subsetting, deisotoping, annotation,
-  normalisation, scaling, image "slicing" and multivariate statistics.
+massPix_ processes high resolution mass spectrometry imaging data, performs
+multivariate statistics (PCA, clustering) and lipid identification.
 
-  Data in imzML format is parsed to R. Ions with intensities greater than a
-  threshold, from each spectra, are extracted and grouped to user-adjustable
-  mass bins. Spectral features are defined by the median m/z value in each
-  bin, and only features detected above a threshold proportion of spectra
-  are retained. Average intensities for all features from a random subset of
-  pixels are computed and used to perform deisotoping. The deisotoping
-  algorithm identifies the molecular ion (M) and removes isotopes at m/z
-  (M+1) and (M+2) which are within a calculated proportion of the intensity
-  of M.
+The overall data processing workflow consists of initial data
+pre-processing, filtering, image subsetting, deisotoping, annotation,
+normalisation, scaling, image "slicing" and multivariate statistics.
 
-  Putative lipid annotation by accurate mass is achieved by searching
-  deisotoped ions against a generated library of lipid m/z ratios computed
-  for all combinations of common fatty acids, lipid head-groups and
-  anticipated adducts in each ionisation mode (functions: `makelibrary` and
-  `annotate`). The criteria for a match can be adjusted according to
-  different MS performance capabilities. Lipid classes searched in positive
-  ion mode are diacylglycerides (DAG), triacylglycerides (TAG),
-  phosphatidylcholines (PC), phosphatidylethanolamines (PE),
-  phosphatidylserines (PS), LysoPC, cholesteryl esters (CE), sphingomyelins
-  (SM) and ceramides (Cer). In negative ion mode, lipid classes searched are
-  PC, phosphatidic acid (PA), PE, PS, phosphatidylglycerols (PG),
-  phosphatidylinositols (PI), Cer and free fatty acids (FFA). Whilst this list
-  is not exhaustive, it does cover the most common lipid classes. Possible
-  adducts considered are [M+K]+, [M+H]+, [M+Na]+, [M+NH4]+ in positive ion
-  mode and [M–H]-, [M+Cl]-, [M+OAc]- in negative ion mode. It is important
-  to point out that a database hit based on accurate mass should only be
-  considered the first step in metabolite identification, and confirmation
-  carried out using MS/MS is required, where this appropriate.
+Data in imzML format is parsed to R. Ions with intensities greater than a
+threshold, from each spectra, are extracted and grouped to user-adjustable
+mass bins. Spectral features are defined by the median m/z value in each
+bin, and only features detected above a threshold proportion of spectra are
+retained. Average intensities for all features from a random subset of
+pixels are computed and used to perform deisotoping. The deisotoping
+algorithm identifies the molecular ion (M) and removes isotopes at m/z (M+1)
+and (M+2) which are within a calculated proportion of the intensity of M.
 
-  massPix_ has the further capability to perform difference matching on
-  deisotoped features to search for mass differences associated with
-  measurement-introduced alternation (e.g. loss of headgroup, loss of water)
-  or biological modifications (e.g. oxidation). The final image is
-  constructed, based on all pixels (function: constructImage). Ion
-  intensities are then normalised either to the median or total ion count,
-  or to the average intensity of a set of standard ions (function:
-  normalise). Single ion images can be produced, or normalised intensities
-  used to create multivariate statistical images based on k-means clustering
-  or PCA following centering and Pareto scaling. The analysis can be readily
-  customised by replacing default parameters for filtering, normalisation
-  and scaling, library composition, lipid assignment and image reporting.
-    
-  .. _massPix: https://github.com/hallz/massPix
-  ]]> </help>
+Putative lipid annotation by accurate mass is achieved by searching
+deisotoped ions against a generated library of lipid m/z ratios computed for
+all combinations of common fatty acids, lipid head-groups and anticipated
+adducts in each ionisation mode (functions: ``makelibrary`` and
+``annotate``).  The criteria for a match can be adjusted according to
+different MS performance capabilities. Lipid classes searched in positive
+ion mode are diacylglycerides (DAG), triacylglycerides (TAG),
+phosphatidylcholines (PC), phosphatidylethanolamines (PE),
+phosphatidylserines (PS), LysoPC, cholesteryl esters (CE), sphingomyelins
+(SM) and ceramides (Cer). In negative ion mode, lipid classes searched are
+PC, phosphatidic acid (PA), PE, PS, phosphatidylglycerols (PG),
+phosphatidylinositols (PI), Cer and free fatty acids (FFA). Whilst this list
+is not exhaustive, it does cover the most common lipid classes. Possible
+adducts considered are [M+K]+, [M+H]+, [M+Na]+, [M+NH4]+ in positive ion
+mode and [M–H]-, [M+Cl]-, [M+OAc]- in negative ion mode. It is important to
+point out that a database hit based on accurate mass should only be
+considered the first step in metabolite identification, and confirmation
+carried out using MS/MS is required, where this appropriate.
+
+massPix_ has the further capability to perform difference matching on
+deisotoped features to search for mass differences associated with
+measurement-introduced alternation (e.g. loss of headgroup, loss of water)
+or biological modifications (e.g. oxidation). The final image DIMS data**
+
+The lipidomics data format is ``mzXML`` which can be converted from raw data
+by ``MSConvert`` of ProteoWizard_. Each file represents one sample or
+replicate. Select multiple ``mzXML`` files for processing. The input data
+will be either positive or negative mode. They cannot be mixed up.
+
+
+.. _ProteoWizard: http://proteowizard.sourceforge.net/
+
+Inputs
+------
+
+**\1. Choose an imzml composite file**
+
+imzml composite file actually includes two files, ``.imzml`` and ``.ibd``.
+The former file contains imaging meta data while the later is the imaging
+binary mass spectral data. The two files must be uploaded as an ``imzml
+composite`` data type via ``Get Data``. 
+
+**\2. Choose processed data**
+
+If you have processed MSI data and saved the results as a tubular data
+before, you can upload it for further analysis such as PCA and clustering
+analysis.
+
+Beware that you still need to load the imzml composite file even you do not
+intend to process again.
+
+Parameters
+----------
+
+Select time range
+~~~~~~~~~~~~~~~~~
+
+
+Select m/z range
+~~~~~~~~~~~~~~~~
+
+
+Select m/z window size
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+Outputs
+----------
+  </help>
   
   <citations>
     <citation type="doi">10.1007/s11306-017-1252-5</citation>
