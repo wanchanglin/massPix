@@ -632,21 +632,45 @@ intend to process again.
 Parameters
 ----------
 
-Select time range
-~~~~~~~~~~~~~~~~~
-
-
-Select m/z range
-~~~~~~~~~~~~~~~~
-
-
-Select m/z window size
-~~~~~~~~~~~~~~~~~~~~~~
-
-
+The parameter setting is for processing image data and plotting. Each
+section gives a brief description how to choose these parameters. 
 
 Outputs
-----------
+-------
+
+**\1. Processed image data**
+
+The processed image is saved in a tubular format: 
+
+========= =================================  =======  =====================================  ================  ================
+peak      annotated                          isotope  modification                           1                 2
+========= =================================  =======  =====================================  ================  ================
+573.4837  [DG-H20(32:0)+Na][DG-H20(34:3)+H]  [6][M]   Fragment[22] insource(phosphocholine)  568252.749061865  715704.166084769
+573.4896  [DG-H20(32:0)+Na][DG-H20(34:3)+H]           Fragment[23] insource(phosphocholine)  445494.724990511  502917.999955269
+573.4933  [DG-H20(34:3)+H]                                                                   96898.8800809354  259849.138593262
+577.5119                                     [7][M]   Fragment[28] insource(phosphocholine)  928718.952331844  365589.233479685
+577.5175  [DG-H20(34:1)+H]                   [8][M]   Fragment[29] insource(phosphocholine)  1724568.99083261  1519223.65269763
+577.5236  [DG-H20(34:1)+H]                   [9][M]   Fragment[30] insource(phosphocholine)  1069278.60455705  934887.648006579
+577.5277                                     [10][M]                                         147309.77849969   144416.617387283
+========= =================================  =======  =====================================  ================  ================
+
+**\2. R running results** (OPTIONAL)
+
+All running results are saved as an R file ``rdata`` for advanced user to
+further analysis.
+
+**\3. PCA plots** (OPTIONAL) 
+
+PCA as well as its loading are plotted. Also the loading values are saved as
+an Excel file. (OPTIONAL)
+
+**\4. Slice plots** (OPTIONAL)
+
+**\5. Cluster plots** (OPTIONAL)
+
+Besides the cluster plots, the cluster intensity values can be saved as a
+tabular format. (OPTIONAL)
+
   </help>
   
   <citations>
