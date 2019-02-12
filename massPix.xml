@@ -35,14 +35,18 @@
   <!-- =============================================================== -->
   <command>
     <![CDATA[
-      cd $imzML_file.extra_files_path &&
+      ## cd $imzML_file.extra_files_path &&
 
-      ## Change uploaded imzml files. Also make them re-useable.
-      [ -f "data.imzml" ] ||  mv *imzml* data.imzml &&
-      [ -f "data.ibd" ] ||  mv *ibd* data.ibd &&
+      ## ## Change uploaded imzml files. Also make them re-useable.
+      ## [ -f "data.imzml" ] ||  mv *imzml* data.imzml &&
+      ## [ -f "data.ibd" ] ||  mv *ibd* data.ibd &&
+     
+      ln -s '${imzML_file.extra_files_path}/imzml' data.imzml &&
+      ln -s '${imzML_file.extra_files_path}/ibd' data.ibd &&
 
       Rscript ${__tool_directory__}/massPix.R
-      --imzML_file $imzML_file.extra_files_path/data.imzml
+      --imzML_file data.imzml
+      ## --imzML_file $imzML_file.extra_files_path/data.imzml
 
       --process $process.process_selector      
       #if $process.process_selector:
