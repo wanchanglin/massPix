@@ -1,5 +1,8 @@
 <tool id="mass_pix" name="massPix" version="0.1.0">
     <description>processes high resolution mass spectrometry imaging data</description>
+    <expand macro="requirements">
+        <requirement type="package" version="3.5.1">r-base</requirement>
+    </expand>
     <stdio>
         <regex match="Execution halted"
                source="both"
