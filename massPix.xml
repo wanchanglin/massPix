@@ -522,41 +522,43 @@
 
   <!-- =============================================================== -->
   <tests>
+    <!-- test for not processing image. Just get PCA et al -->
       <!-- 'WriteXLS' gives different size although the contents are the same -->
       <!-- different result in clustering because of randomness-->
-    <test>
-      <expand macro="infile_imzml"/>
-      <param name="process_selector" value="FALSE" /> 
-      <param name="image_file" value="image_norm.tsv" />
-      <param name="pca_selector" value="TRUE" /> 
-      <param name="loading" value="TRUE" /> 
-      <param name="slice_selector" value="TRUE" /> 
-      <param name="clus_selector" value="TRUE" /> 
-      <param name="intensity" value="TRUE" /> 
-      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
-      <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/>
-      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
-      <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
-      <output name="intensity_out" file="res/intensity.tsv" />
-    </test>
+    <!-- <test> -->
+    <!--   <expand macro="infile_imzml"/> -->
+    <!--   <param name="process_selector" value="FALSE" /> --> 
+    <!--   <param name="image_file" value="image_norm.tsv" /> -->
+    <!--   <param name="pca_selector" value="TRUE" /> --> 
+    <!--   <param name="loading" value="TRUE" /> --> 
+    <!--   <param name="slice_selector" value="TRUE" /> --> 
+    <!--   <param name="clus_selector" value="TRUE" /> --> 
+    <!--   <param name="intensity" value="TRUE" /> --> 
+    <!--   <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/> -->
+    <!--   <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
+    <!--   <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/> -->
+    <!--   <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/> -->
+    <!--   <output name="intensity_out" file="res/intensity.tsv" /> -->
+    <!-- </test> -->
 
     <test>
       <expand macro="infile_imzml"/>
-      <param name="process_selector" value="FALSE" /> 
-      <param name="image_file" value="image_norm.tsv" />
+      <param name="process_selector" value="TRUE" /> 
+      <param name="rem_outliers" value="TRUE" /> 
+      <param name="summary" value="TRUE" /> 
       <param name="rdata" value="TRUE" /> 
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <param name="slice_selector" value="TRUE" /> 
       <param name="clus_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
-      <output name="image_out" file="res/image.tsv" />
-      <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
+      <!-- <output name="image_out" file="res/image.tsv" /> -->
+      <!-- <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" /> -->
       <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
-      <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/>
-      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
-      <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
-      <output name="intensity_out" file="res/intensity.tsv" />
+      <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
+      <!-- <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/> -->
+      <!-- <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/> -->
+      <!-- <output name="intensity_out" file="res/intensity.tsv" /> -->
     </test>
   </tests>
 

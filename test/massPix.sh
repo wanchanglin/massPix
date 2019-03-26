@@ -5,9 +5,9 @@
 Rscript --vanilla ../massPix.R \
   --imzML_file "../test-data/test_POS.imzML" \
   --image_file "../test-data/image_norm.tsv" \
-  --process FALSE \
+  --process TRUE \
   --rem_outliers TRUE \
-  --summary FALSE \
+  --summary TRUE \
   --rdata TRUE\
   --pca TRUE \
   --loading TRUE \

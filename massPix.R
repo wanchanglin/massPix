@@ -238,7 +238,7 @@ if(com_f){
 
 }
 
-opt
+#' opt
 
 suppressPackageStartupMessages({
   source(paste0(home_dir,"all_massPix.R"))
