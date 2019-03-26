@@ -25,5 +25,11 @@
                           carefully and contact your administrator." />
     </stdio>
   </xml>
+  <xml name="infile_imzml">
+    <param name="imzML_file" value="" ftype="imzml">
+      <composite_data value="test_POS.imzML"/>
+      <composite_data value="test_POS.ibd"/>
+    </param>
+  </xml>
 
 </macros>

@@ -45,7 +45,6 @@ suppressPackageStartupMessages({
 
 if(com_f){
 
-  #' -----------------------------------------------------------------------
   #' Setup home directory
   #' wl-24-11-2017, Fri: A dummy function for the base directory. The reason
   #' to write such a function is to keep the returned values by
@@ -60,7 +59,6 @@ if(com_f){
   #' prog_name <- basename(func())
   home_dir <- paste0(dirname(func()),"/")
 
-  #' -----------------------------------------------------------------------
   #' Specify our desired options in a list by default OptionParser will add
   #' an help option equivalent to make_option(c("-h", "--help"),
   #' action="store_true", default=FALSE, help="Show this help message and
@@ -85,7 +83,7 @@ if(com_f){
         #' make library
         make_option("--ionisation_mode",type="character", default = "positive"),
         make_option("--fixed",type="logical",default = FALSE),
-        make_option("--fixed_FA",type="integer",default = 16),
+        make_option("--fixed_FA",type="double",default = 16),
 
         #' mz_extractor
         make_option("--thres_int", type="integer", default=100000),
@@ -159,7 +157,6 @@ if(com_f){
 
   opt <- parse_args(object=OptionParser(option_list=option_list),
                     args = commandArgs(trailingOnly = TRUE))
-  #' opt
 } else {
 
   #' home_dir <- "C:/R_lwc/massPix/"         #' for windows
@@ -240,7 +237,8 @@ if(com_f){
   )
 
 }
-#' opt$loading
+
+opt
 
 suppressPackageStartupMessages({
   source(paste0(home_dir,"all_massPix.R"))
