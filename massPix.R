@@ -8,6 +8,9 @@
 #' wl-30-01-2018, Tue: fix bugs in 'standards'
 #' wl-12-02-2018, Mon: change output file as tabular (.tab) for galaxy only
 #' wl-14-02-2018, Wed: save cluster intensity data
+#' wl-28-03-2019, Thu: apply style_file() to reformat this script and use
+#'  vim's folding as outline view. Without reformatng, the folding
+#'  is messy.
 #' Usages:
 #'  1.) For command line and galaxy, change `com_f` to TRUE.
 #'  2.) For command line, change `home_dir` as appropriate
@@ -17,18 +20,18 @@
 
 ## ==== General settings ====
 
-rm(list=ls(all=T))
+rm(list = ls(all = T))
 
 #' flag for command-line use or not. If false, only for debug interactively.
-com_f  <- TRUE
+com_f <- TRUE
 
 #' galaxy will stop even if R has warning message
-options(warn=-1) #' disable R warning. Turn back: options(warn=0)
+options(warn = -1) #' disable R warning. Turn back: options(warn=0)
 
 #' Setup R error handling to go to stderr
-options( show.error.messages=F, error = function (){
-  cat( geterrmessage(), file=stderr() )
-  q( "no", 1, F )
+options(show.error.messages = F, error = function() {
+  cat(geterrmessage(), file = stderr())
+  q("no", 1, F)
 })
 
 #' we need that to not crash galaxy with an UTF8 error on German LC settings.
@@ -43,7 +46,7 @@ suppressPackageStartupMessages({
 
 ## ==== Command line or interactive setting ====
 
-if(com_f){
+if (com_f) {
 
   #' Setup home directory
   #' wl-24-11-2017, Fri: A dummy function for the base directory. The reason
@@ -52,210 +55,221 @@ if(com_f){
   #' otherwise 'parse_args' will use the results of
   #' 'commandArgs(trailingOnly = FALSE)' even with 'args =
   #' commandArgs(trailingOnly = TRUE)' in its argument area.
-  func <- function(){
+  func <- function() {
     argv <- commandArgs(trailingOnly = FALSE)
-    path <- sub("--file=","",argv[grep("--file=",argv)])
+    path <- sub("--file=", "", argv[grep("--file=", argv)])
   }
   #' prog_name <- basename(func())
-  home_dir <- paste0(dirname(func()),"/")
+  home_dir <- paste0(dirname(func()), "/")
 
   #' Specify our desired options in a list by default OptionParser will add
   #' an help option equivalent to make_option(c("-h", "--help"),
   #' action="store_true", default=FALSE, help="Show this help message and
   #' exit")
-  option_list <-
-    list(
-        make_option(c("-v", "--verbose"), action="store_true", default=TRUE,
-                    help="Print extra output [default]"),
-        make_option(c("-q", "--quietly"), action="store_false",
-                    dest="verbose", help="Print little output"),
+  option_list <- list(
+    make_option(c("-v", "--verbose"),
+      action = "store_true", default = TRUE,
+      help = "Print extra output [default]"
+    ),
+    make_option(c("-q", "--quietly"),
+      action = "store_false",
+      dest = "verbose", help = "Print little output"
+    ),
 
-        #' input files
-        make_option("--imzML_file", type="character",
-                    help="Mass spectrometry imaging data to be processed.
-                     Currently imzML format is supported."),
-        make_option("--image_file", type="character",
-                    help="Processed imaging data to be further analysis."),
+    #' input files
+    make_option("--imzML_file",
+      type = "character",
+      help = "Mass spectrometry imaging data to be processed.
+                  Currently imzML format is supported."
+    ),
+    make_option("--image_file",
+      type = "character",
+      help = "Processed imaging data to be further analysis."
+    ),
 
-        #' image processing
-        make_option("--process", type="logical", default=TRUE),
+    #' image processing
+    make_option("--process", type = "logical", default = TRUE),
 
-        #' make library
-        make_option("--ionisation_mode",type="character", default = "positive"),
-        make_option("--fixed",type="logical",default = FALSE),
-        make_option("--fixed_FA",type="double",default = 16),
+    #' make library
+    make_option("--ionisation_mode", type = "character", default = "positive"),
+    make_option("--fixed", type = "logical", default = FALSE),
+    make_option("--fixed_FA", type = "double", default = 16),
 
-        #' mz_extractor
-        make_option("--thres_int", type="integer", default=100000),
-        make_option("--thres_low",type="integer",default= 200),
-        make_option("--thres_high",type="integer",default = 1000),
+    #' mz_extractor
+    make_option("--thres_int", type = "integer", default = 100000),
+    make_option("--thres_low", type = "integer", default = 200),
+    make_option("--thres_high", type = "integer", default = 1000),
 
-        #' peak_bin
-        make_option("--bin_ppm",type="integer",default = 10),
+    #' peak_bin
+    make_option("--bin_ppm", type = "integer", default = 10),
 
-        #' subset_image
-        make_option("--percentage_deiso",type="integer",default = 3 ),
+    #' subset_image
+    make_option("--percentage_deiso", type = "integer", default = 3),
 
-        #' filter
-        make_option("--steps",type="double", default = 0.05),
-        make_option("--thres_filter",type="integer",default = 11),
+    #' filter
+    make_option("--steps", type = "double", default = 0.05),
+    make_option("--thres_filter", type = "integer", default = 11),
 
-        #' deisotope
-        make_option("--ppm",type="integer", default = 3),
-        make_option("--no_isotopes",type="integer", default = 2),
-        make_option("--prop_1",type="double",default = 0.9),
-        make_option("--prop_2",type="double",default = 0.5),
-        make_option("--search_mod",type="logical",default = TRUE),
-        make_option("--mod",type="character",
-                    default = "c(NL = T, label = F, oxidised = F, desat = F)"),
+    #' deisotope
+    make_option("--ppm", type = "integer", default = 3),
+    make_option("--no_isotopes", type = "integer", default = 2),
+    make_option("--prop_1", type = "double", default = 0.9),
+    make_option("--prop_2", type = "double", default = 0.5),
+    make_option("--search_mod", type = "logical", default = TRUE),
+    make_option("--mod",
+      type = "character",
+      default = "c(NL = T, label = F, oxidised = F, desat = F)"
+    ),
 
-        #' annotate
-        make_option("--ppm_annotate",type="integer",default = 10),
+    #' annotate
+    make_option("--ppm_annotate", type = "integer", default = 10),
 
-        #' normalise
-        make_option("--norm_type",type="character",default = "TIC" ),
-        make_option("--standards",type="character",default = "NULL" ),
+    #' normalise
+    make_option("--norm_type", type = "character", default = "TIC"),
+    make_option("--standards", type = "character", default = "NULL"),
 
-        #' output parameters and files
-        make_option("--image_out",type="character", default="image.tsv",
-                    help="Processed imaging data visualisation"),
+    #' output parameters and files
+    make_option("--image_out",
+      type = "character", default = "image.tsv",
+      help = "Processed imaging data visualisation"
+    ),
 
-        make_option("--rdata", type="logical", default=TRUE),
-        make_option("--rdata_out",type="character", default="r_running.rdata",
-                    help="All the running results in RData for inspection."),
+    make_option("--rdata", type = "logical", default = TRUE),
+    make_option("--rdata_out",
+      type = "character", default = "r_running.rdata",
+      help = "All the running results in RData for inspection."
+    ),
 
-        #' plot parameters
-        make_option("--scale",type="integer",default = 100 ),
-        make_option("--nlevels",type="integer",default = 50 ),
-        make_option("--res_spatial",type="integer",default = 50),
-        make_option("--rem_outliers",type="logical",default = TRUE),
-        make_option("--summary",type="logical", default = FALSE ),
-        make_option("--title",type="logical", default = TRUE ),
+    #' plot parameters
+    make_option("--scale", type = "integer", default = 100),
+    make_option("--nlevels", type = "integer", default = 50),
+    make_option("--res_spatial", type = "integer", default = 50),
+    make_option("--rem_outliers", type = "logical", default = TRUE),
+    make_option("--summary", type = "logical", default = FALSE),
+    make_option("--title", type = "logical", default = TRUE),
 
-        #' pca plot
-        make_option("--pca", type="logical", default=TRUE),
-        make_option("--pca_out",type="character",default="pca.pdf"),
-        make_option("--scale_type",type="character",default = "cs" ),
-        make_option("--transform",type="logical",default = FALSE ),
-        make_option("--PCnum",type="integer",default = 5),
-        make_option("--loading", type="logical", default=TRUE),
-        make_option("--loading_out",type="character", default="loading.xlsx"),
+    #' pca plot
+    make_option("--pca", type = "logical", default = TRUE),
+    make_option("--pca_out", type = "character", default = "pca.pdf"),
+    make_option("--scale_type", type = "character", default = "cs"),
+    make_option("--transform", type = "logical", default = FALSE),
+    make_option("--PCnum", type = "integer", default = 5),
+    make_option("--loading", type = "logical", default = TRUE),
+    make_option("--loading_out", type = "character", default = "loading.xlsx"),
 
-        #' slice plot
-        make_option("--slice", type="logical", default=TRUE),
-        make_option("--slice_out", type="character", default="slice.pdf"),
-        make_option("--row",type="integer",default = 12),
+    #' slice plot
+    make_option("--slice", type = "logical", default = TRUE),
+    make_option("--slice_out", type = "character", default = "slice.pdf"),
+    make_option("--row", type = "integer", default = 12),
 
-        #' cluster plot
-        make_option("--clus", type="logical", default=TRUE),
-        make_option("--clus_out", type="character", default="clus.pdf"),
-        make_option("--cluster_type",type="character", default = "kmeans"),
-        make_option("--clusters",type="integer",default = 5),
-        make_option("--intensity", type="logical", default=TRUE),
-        make_option("--intensity_out",type="character", default="intensity.tsv")
-    )
-
-  opt <- parse_args(object=OptionParser(option_list=option_list),
-                    args = commandArgs(trailingOnly = TRUE))
-} else {
-
-  #' home_dir <- "C:/R_lwc/massPix/"         #' for windows
-  home_dir <- "/home/wl/my_galaxy/massPix/"  #' for linux. must be case-sensitive
-
-  opt <- list(
-      #' -------------------------------------------------------------------
-      #' input files. Note that using full path here.
-      imzML_file = paste0(home_dir, "test-data/test_POS.imzML"),
-      image_file = paste0(home_dir, "test-data/image_norm.tsv"),
-
-      #' image data processing parameters
-      process = FALSE,
-
-      #' make library
-      ionisation_mode = "positive",
-      fixed = FALSE,
-      fixed_FA = 16,
-      #' mz_extractor
-      thres_int = 100000,
-      thres_low = 200,
-      thres_high = 1000,
-      #' peak_bin
-      bin_ppm = 10,
-      #' subset_image
-      percentage_deiso = 3 ,
-      #' filter
-      steps = 0.05,
-      thres_filter = 11,
-      #' deisotope
-      ppm = 3,
-      no_isotopes = 2,
-      prop_1 = 0.9,
-      prop_2 = 0.5,
-      search_mod = TRUE,
-      mod = "c(NL = T, label = F, oxidised = F, desat = F)",
-      #' annotate
-      ppm_annotate = 10,
-      #' normalise
-      norm_type = "TIC",
-      standards = "NULL",
-
-      #' output parameters and files
-      image_out = paste0(home_dir, "test-data/res/image.tsv"),
-
-      rdata     = TRUE,
-      rdata_out = paste0(home_dir, "test-data/res/r_running.rdata"),
-
-      #' plot parameters
-      scale        = 100,
-      nlevels      = 50 ,
-      res_spatial  = 50,
-      rem_outliers = TRUE,
-      summary      = FALSE ,
-      title        = TRUE ,
-
-      #' pca plot
-      pca         = TRUE,
-      pca_out     = paste0(home_dir, "test-data/res/pca.pdf"),
-      scale_type  = "cs" ,
-      transform   = FALSE ,
-      PCnum       = 5,
-      loading     = TRUE,
-      loading_out = paste0(home_dir, "test-data/res/loading.xlsx"),
-
-      #' slice plot
-      slice     = TRUE,
-      slice_out = paste0(home_dir, "test-data/res/slice.pdf"),
-      row       = 12,
-
-      #' cluster plot
-      clus         = TRUE,
-      clus_out     = paste0(home_dir, "test-data/res/clus.pdf"),
-      cluster_type = "kmeans",
-      clusters     = 5,
-      intensity    = TRUE,
-      intensity_out = paste0(home_dir, "test-data/res/intensity.tsv")
+    #' cluster plot
+    make_option("--clus", type = "logical", default = TRUE),
+    make_option("--clus_out", type = "character", default = "clus.pdf"),
+    make_option("--cluster_type", type = "character", default = "kmeans"),
+    make_option("--clusters", type = "integer", default = 5),
+    make_option("--intensity", type = "logical", default = TRUE),
+    make_option("--intensity_out", type = "character", default = "intensity.tsv")
   )
 
-}
+  opt <- parse_args(
+    object = OptionParser(option_list = option_list),
+    args = commandArgs(trailingOnly = TRUE)
+  )
+} else {
+  #' home_dir <- "C:/R_lwc/massPix/"         #' for windows
+  home_dir <- "/home/wl/my_galaxy/massPix/" #' for linux. must be case-sensitive
+  opt <- list(
+    #' -------------------------------------------------------------------
+    #' input files. Note that using full path here.
+    imzML_file = paste0(home_dir, "test-data/test_POS.imzML"),
+    image_file = paste0(home_dir, "test-data/image_norm.tsv"),
 
+    #' image data processing parameters
+    process = FALSE,
+
+    #' make library
+    ionisation_mode = "positive",
+    fixed = FALSE,
+    fixed_FA = 16,
+    #' mz_extractor
+    thres_int = 100000,
+    thres_low = 200,
+    thres_high = 1000,
+    #' peak_bin
+    bin_ppm = 10,
+    #' subset_image
+    percentage_deiso = 3,
+    #' filter
+    steps = 0.05,
+    thres_filter = 11,
+    #' deisotope
+    ppm = 3,
+    no_isotopes = 2,
+    prop_1 = 0.9,
+    prop_2 = 0.5,
+    search_mod = TRUE,
+    mod = "c(NL = T, label = F, oxidised = F, desat = F)",
+    #' annotate
+    ppm_annotate = 10,
+    #' normalise
+    norm_type = "TIC",
+    standards = "NULL",
+
+    #' output parameters and files
+    image_out = paste0(home_dir, "test-data/res/image.tsv"),
+
+    rdata = TRUE,
+    rdata_out = paste0(home_dir, "test-data/res/r_running.rdata"),
+
+    #' plot parameters
+    scale = 100,
+    nlevels = 50,
+    res_spatial = 50,
+    rem_outliers = TRUE,
+    summary = FALSE,
+    title = TRUE,
+
+    #' pca plot
+    pca = TRUE,
+    pca_out = paste0(home_dir, "test-data/res/pca.pdf"),
+    scale_type = "cs",
+    transform = FALSE,
+    PCnum = 5,
+    loading = TRUE,
+    loading_out = paste0(home_dir, "test-data/res/loading.xlsx"),
+
+    #' slice plot
+    slice = TRUE,
+    slice_out = paste0(home_dir, "test-data/res/slice.pdf"),
+    row = 12,
+
+    #' cluster plot
+    clus = TRUE,
+    clus_out = paste0(home_dir, "test-data/res/clus.pdf"),
+    cluster_type = "kmeans",
+    clusters = 5,
+    intensity = TRUE,
+    intensity_out = paste0(home_dir, "test-data/res/intensity.tsv")
+  )
+}
 #' opt
 
 suppressPackageStartupMessages({
-  source(paste0(home_dir,"all_massPix.R"))
+  source(paste0(home_dir, "all_massPix.R"))
 })
 
 ## ==== Pre-processing ====
 
 #' imzML converter
-lib_dir     <- paste0(home_dir,"libraries/")
-imzMLparse  <- paste0(home_dir,"imzMLConverter/imzMLConverter.jar")
+lib_dir <- paste0(home_dir, "libraries/")
+imzMLparse <- paste0(home_dir, "imzMLConverter/imzMLConverter.jar")
 
 options(java.parameters = "Xmx4g")
 
 #' enforce the following required arguments
 if (is.null(opt$imzML_file)) {
   cat("'imzML_file' is required\n")
-  q(status=1)
+  q(status = 1)
 }
 #' wl-07-02-2018, Wed: 'imzML_file' must be provided no matter what
 #' 'process' is. For 'process' is FALSE, it gives 'x.cood' and 'y.cood' for
@@ -264,30 +278,30 @@ if (is.null(opt$imzML_file)) {
 if (!opt$process) {
   if (is.null(opt$image_file)) {
     cat("'image_file' is required\n")
-    q(status=1)
+    q(status = 1)
   }
 }
 
 #' read in library files
-read <- read.csv(paste(lib_dir,"lib_FA.csv",sep="/"), sep=",", header=T)
-lookup_FA <- read[,2:4]
-row.names(lookup_FA) <- read[,1]
+read <- read.csv(paste(lib_dir, "lib_FA.csv", sep = "/"), sep = ",", header = T)
+lookup_FA <- read[, 2:4]
+row.names(lookup_FA) <- read[, 1]
 
-read <- read.csv(paste(lib_dir,"lib_class.csv",sep="/"), sep=",", header=T)
-lookup_lipid_class <- read[,2:3]
-row.names(lookup_lipid_class) <- read[,1]
+read <- read.csv(paste(lib_dir, "lib_class.csv", sep = "/"), sep = ",", header = T)
+lookup_lipid_class <- read[, 2:3]
+row.names(lookup_lipid_class) <- read[, 1]
 
-read <- read.csv(paste(lib_dir,"lib_element.csv",sep="/"), sep=",", header=T)
-lookup_element <- read[,2:3]
-row.names(lookup_element) <- read[,1]
+read <- read.csv(paste(lib_dir, "lib_element.csv", sep = "/"), sep = ",", header = T)
+lookup_element <- read[, 2:3]
+row.names(lookup_element) <- read[, 1]
 
-read <- read.csv(paste(lib_dir,"lib_modification.csv",sep="/"), sep=",", header=T)
-lookup_mod <- read[,2:ncol(read)]
-row.names(lookup_mod ) <- read[,1]
+read <- read.csv(paste(lib_dir, "lib_modification.csv", sep = "/"), sep = ",", header = T)
+lookup_mod <- read[, 2:ncol(read)]
+row.names(lookup_mod) <- read[, 1]
 
 #' parsing the data and getting x and y dimensions
 .jinit()
-.jaddClassPath(path=imzMLparse)
+.jaddClassPath(path = imzMLparse)
 
 imzML <- J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
 #' wl-07-11-2017, Tue: Location opt$ibd_file is also written into imzML.
@@ -295,135 +309,158 @@ imzML <- J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
 #' and extention names imzML and ibd, respectively. You can see this from
 #' CPP file: (https://goo.gl/WTkFkn)
 #'
-#' // Remove ".imzML" from the end of the file
-#' 		this->ibdLocation = imzMLFilename.substr(0, imzMLFilename.size()-6) + ".ibd";
+#'  // Remove ".imzML" from the end of the file
+#' 	this->ibdLocation = imzMLFilename.substr(0, imzMLFilename.size()-6) + ".ibd";
 #'
 #' Otherwise this function: J(spectrum, 'getIntensityArray') does not work.
-#' Three functions mzextractor, subsetImage and contructImage call
-#' J(spectrum, 'getIntensityArray'.
-
+#' Three functions mzextractor, subsetImage and contructImage call this
+#' function.
 #' wl-25-11-2017, Sat: imzML and ibd file must be uploaded and located in
 #' the same directory. If so, no need to pass ibd file into R code since
 #' imzMLConverter will get ibd file implicitely based on the directory and
 #' name of imzML file.
 
-x.cood <- J(imzML, 'getWidth')
-y.cood <- J(imzML, 'getHeight')
+x.cood <- J(imzML, "getWidth")
+y.cood <- J(imzML, "getHeight")
 
-## ===== Main Process ====
+## ==== Main Process ====
 
 if (opt$process) {
   #' make library
-  dbase <- makelibrary(ionisation_mode = opt$ionisation_mode,
-                       sel.class=NULL, fixed = opt$fixed,
-                       fixed_FA = opt$fixed_FA,
-                       lookup_lipid_class = lookup_lipid_class,
-                       lookup_FA = lookup_FA,
-                       lookup_element = lookup_element)
+  dbase <- makelibrary(
+    ionisation_mode = opt$ionisation_mode,
+    sel.class = NULL, fixed = opt$fixed,
+    fixed_FA = opt$fixed_FA,
+    lookup_lipid_class = lookup_lipid_class,
+    lookup_FA = lookup_FA,
+    lookup_element = lookup_element
+  )
 
   #' Extract m/z and pick peaks
-  extracted <- mzextractor(files = opt$imzML,
-                           imzMLparse = imzMLparse,
-                           thres.int = opt$thres_int,
-                           thres.low = opt$thres_low,
-                           thres.high = opt$thres_high)
+  extracted <- mzextractor(
+    files = opt$imzML,
+    imzMLparse = imzMLparse,
+    thres.int = opt$thres_int,
+    thres.low = opt$thres_low,
+    thres.high = opt$thres_high
+  )
 
   #' Bin all m/zs by ppm bucket
-  peaks <- peakpicker.bin(extracted=extracted, bin.ppm=opt$bin_ppm)
+  peaks <- peakpicker.bin(extracted = extracted, bin.ppm = opt$bin_ppm)
 
   #' Generate subset of first image file to improve speed of deisotoping
-  temp.image <-  subsetImage(extracted = extracted, peaks = peaks,
-                             percentage.deiso = opt$percentage_deiso,
-                             thres.int = opt$thres_int,
-                             thres.low = opt$thres_low,
-                             thres.high = opt$thres_high,
-                             files = opt$imzML,
-                             imzMLparse = imzMLparse)
+  temp.image <- subsetImage(
+    extracted = extracted, peaks = peaks,
+    percentage.deiso = opt$percentage_deiso,
+    thres.int = opt$thres_int,
+    thres.low = opt$thres_low,
+    thres.high = opt$thres_high,
+    files = opt$imzML,
+    imzMLparse = imzMLparse
+  )
 
   #' Filter to a matrix subset that includes variables above a threshold of
   #' missing values
-  temp.image.filtered <- filter(imagedata.in=temp.image,
-                                steps= seq(0,1,opt$steps),
-                                thres.filter=opt$thres_filter,
-                                offset = 1)
+  temp.image.filtered <- filter(
+    imagedata.in = temp.image,
+    steps = seq(0, 1, opt$steps),
+    thres.filter = opt$thres_filter,
+    offset = 1
+  )
 
   #' Perform deisotoping on a subset of the image
-  deisotoped <- deisotope(ppm = opt$ppm, no_isotopes = opt$no_isotopes,
-                          prop.1 = opt$prop_1, prop.2 = opt$prop_2,
-                          peaks = list("",temp.image.filtered[,1]),
-                          image.sub = temp.image.filtered,
-                          search.mod = opt$search_mod,
-                          mod = eval(parse(text=opt$mod)),
-                          lookup_mod = lookup_mod)
+  deisotoped <- deisotope(
+    ppm = opt$ppm, no_isotopes = opt$no_isotopes,
+    prop.1 = opt$prop_1, prop.2 = opt$prop_2,
+    peaks = list("", temp.image.filtered[, 1]),
+    image.sub = temp.image.filtered,
+    search.mod = opt$search_mod,
+    mod = eval(parse(text = opt$mod)),
+    lookup_mod = lookup_mod
+  )
 
   #' Perform annotation of lipids using library
-  annotated <- annotate(ionisation_mode = opt$ionisation_mode,
-                        deisotoped = deisotoped,
-                        ppm.annotate = opt$ppm_annotate,
-                        dbase = dbase)
+  annotated <- annotate(
+    ionisation_mode = opt$ionisation_mode,
+    deisotoped = deisotoped,
+    ppm.annotate = opt$ppm_annotate,
+    dbase = dbase
+  )
 
   #' make full image and add lipid ids
   #' wl-23-08-2017: it takes **LONG TIME**.
-  final.image <- contructImage(extracted = extracted,
-                               deisotoped = deisotoped,
-                               peaks = peaks, imzMLparse = imzMLparse,
-                               thres.int = opt$thres_int,
-                               thres.low = opt$thres_low,
-                               thres.high = opt$thres_high,
-                               files = opt$imzML)
+  final.image <- contructImage(
+    extracted = extracted,
+    deisotoped = deisotoped,
+    peaks = peaks, imzMLparse = imzMLparse,
+    thres.int = opt$thres_int,
+    thres.low = opt$thres_low,
+    thres.high = opt$thres_high,
+    files = opt$imzML
+  )
 
-  ids <- cbind(deisotoped[[2]][,1], annotated, deisotoped[[2]][,3:4])
+  ids <- cbind(deisotoped[[2]][, 1], annotated, deisotoped[[2]][, 3:4])
 
   #' Create annotated image
-  image.ann <- cbind(ids, final.image[,2:ncol(final.image)])
+  image.ann <- cbind(ids, final.image[, 2:ncol(final.image)])
 
   #' Normalise image
-  image.norm <- normalise(imagedata.in = image.ann,
-                          norm.type = opt$norm_type,
-                          standards = eval(parse(text=opt$standards)),
-                          offset = 4)
+  image.norm <- normalise(
+    imagedata.in = image.ann,
+    norm.type = opt$norm_type,
+    standards = eval(parse(text = opt$standards)),
+    offset = 4
+  )
 
   #' wl-12-02-2018, Mon: change the first column name
   colnames(image.norm)[1] <- "peak"
 
   #' save processed results
   #' write.csv(image.norm, file=opt$image_out, row.names = FALSE)
-  write.table(image.norm, file=opt$image_out, sep="\t",row.names = FALSE)
+  write.table(image.norm, file = opt$image_out, sep = "\t", row.names = FALSE)
 
   #' save to rda for debug
-  if (opt$rdata){
+  if (opt$rdata) {
     save(image.norm, image.ann, final.image, annotated, deisotoped,
-         temp.image.filtered, temp.image, peaks, extracted, dbase,
-         file=opt$rdata_out)
+      temp.image.filtered, temp.image, peaks, extracted, dbase,
+      file = opt$rdata_out
+    )
   }
-
 } else {
-  image.norm <- read.table(opt$image_file, sep="\t", header = TRUE,
-                         na.strings = "", stringsAsFactors=T)
+  image.norm <- read.table(opt$image_file,
+    sep = "\t", header = TRUE,
+    na.strings = "", stringsAsFactors = T
+  )
 }
 
 
 ## ==== Perform PCA if requested ====
 
-if(opt$pca){
-  image.scale <- centreScale(imagedata.in = image.norm,
-                             scale.type = opt$scale_type,
-                             transform = opt$transform,
-                             offset = 4)
+if (opt$pca) {
+  image.scale <- centreScale(
+    imagedata.in = image.norm,
+    scale.type = opt$scale_type,
+    transform = opt$transform,
+    offset = 4
+  )
 
-  pdf(file = opt$pca_out, onefile=T)
-  imagePca(imagedata.in = image.scale, offset = 4,
-           PCnum = opt$PCnum, scale = opt$scale,
-           x.cood = x.cood, y.cood = y.cood,
-           nlevels = opt$nlevels, res.spatial = opt$res_spatial,
-           rem.outliers = opt$rem_outliers,
-           summary = opt$summary, title = opt$title)
+  pdf(file = opt$pca_out, onefile = T)
+  imagePca(
+    imagedata.in = image.scale, offset = 4,
+    PCnum = opt$PCnum, scale = opt$scale,
+    x.cood = x.cood, y.cood = y.cood,
+    nlevels = opt$nlevels, res.spatial = opt$res_spatial,
+    rem.outliers = opt$rem_outliers,
+    summary = opt$summary, title = opt$title
+  )
   dev.off()
 
   if (opt$loading) {
-    pca <- princomp(t(image.scale[,(4+1):ncol(image.scale)]), cor = FALSE,
-                    scores = TRUE, covmat = NULL)
-    labs.all <- as.numeric(as.vector(image.scale[,1]))
+    pca <- princomp(t(image.scale[, (4 + 1):ncol(image.scale)]),
+      cor = FALSE,
+      scores = TRUE, covmat = NULL
+    )
+    labs.all <- as.numeric(as.vector(image.scale[, 1]))
 
     #' for (i in 1:opt$PCnum){
     #'   loadings <- pca$loadings[,i]
@@ -432,51 +469,54 @@ if(opt$pca){
     #' }
 
     #' wl-05-02-2018, Mon: save as one excel file
-    ld <- lapply(1:opt$PCnum, function(i){
-                   loadings <- pca$loadings[,i]
-                   loadings <- cbind(loadings, labs.all)
-                   loadings <- as.data.frame(loadings)
-                    })
-    names(ld) <- paste0("PC",1:opt$PCnum)
+    ld <- lapply(1:opt$PCnum, function(i) {
+      loadings <- pca$loadings[, i]
+      loadings <- cbind(loadings, labs.all)
+      loadings <- as.data.frame(loadings)
+    })
+    names(ld) <- paste0("PC", 1:opt$PCnum)
 
-    WriteXLS(ld, ExcelFileName = opt$loading_out,
-             row.names = F, FreezeRow = 1)
+    WriteXLS(ld,
+      ExcelFileName = opt$loading_out,
+      row.names = F, FreezeRow = 1
+    )
   }
-
 }
 
 ## ==== Make ion slice if requested ====
 
-if(opt$slice){
-  pdf(file = opt$slice_out, onefile=T)
-  imageSlice(row = opt$row, imagedata.in = image.norm, scale = opt$scale,
-             x.cood = x.cood, y.cood = y.cood,
-             nlevels = opt$nlevels,
-             name = image.norm[opt$row,1],
-             subname = image.norm[opt$row,2],
-             offset = 4, res.spatial = opt$res_spatial,
-             rem.outliers = opt$rem_outliers, summary = opt$summary,
-             title = opt$title)
+if (opt$slice) {
+  pdf(file = opt$slice_out, onefile = T)
+  imageSlice(
+    row = opt$row, imagedata.in = image.norm, scale = opt$scale,
+    x.cood = x.cood, y.cood = y.cood,
+    nlevels = opt$nlevels,
+    name = image.norm[opt$row, 1],
+    subname = image.norm[opt$row, 2],
+    offset = 4, res.spatial = opt$res_spatial,
+    rem.outliers = opt$rem_outliers, summary = opt$summary,
+    title = opt$title
+  )
   dev.off()
 }
 
 ## ==== Perform clustering if requested ====
 
-if(opt$clus){
-  pdf(file = opt$clus_out, onefile=T)
-  intensity  <- cluster(cluster.type = opt$cluster_type,
-                        imagedata.in = image.norm,
-                        offset = 4, res.spatial = opt$res_spatial,
-                        width = x.cood, height = y.cood,
-                        clusters = opt$clusters)
+if (opt$clus) {
+  pdf(file = opt$clus_out, onefile = T)
+  intensity <- cluster(
+    cluster.type = opt$cluster_type,
+    imagedata.in = image.norm,
+    offset = 4, res.spatial = opt$res_spatial,
+    width = x.cood, height = y.cood,
+    clusters = opt$clusters
+  )
   dev.off()
 
-  if (opt$intensity){
+  if (opt$intensity) {
     #' write.table(intensity,file=opt$intensity_out,sep="\t")
     #' wl-14-02-2018, Wed: more need to be done for "\t"
-    tmp <- cbind(Clusters=rownames(intensity),intensity)
-    write.table(tmp,file=opt$intensity_out,sep="\t",row.name=FALSE)
+    tmp <- cbind(Clusters = rownames(intensity), intensity)
+    write.table(tmp, file = opt$intensity_out, sep = "\t", row.name = FALSE)
   }
 }
-
-

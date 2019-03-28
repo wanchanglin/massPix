@@ -8,13 +8,11 @@ publication](https://link.springer.com/article/10.1007%2Fs11306-017-1252-5).
 
 ## Installation ##
 
-You need to install [Galaxy](https://github.com/galaxyproject/galaxy) and
-[R](https://cran.r-project.org/) under Linux. 
+- Install [Galaxy](https://github.com/galaxyproject/galaxy) under Linux.
 
-- Install four R packages `optparse`, `WriteXLS`, `calibrate` and `rJava`
-  inside R. 
-- Do not install R package `massPix`. This tool embeds a modified `massPix`
-  package for Galaxy only.
+- Install [conda](https://docs.conda.io/en/latest/miniconda.html) under
+  Linux. `conda` is used to install `requirements` of this tool. 
+
 - Use `git` to clone this tool
 
   ```bash
@@ -40,14 +38,14 @@ You need to install [Galaxy](https://github.com/galaxyproject/galaxy) and
   </toolbox>
   ```
 
-- Download test data (.ibd and .imzML files) from the
+- The Galaxy tool uses [R](https://cran.r-project.org/) packages `optparse`,
+  `WriteXLS`, `calibrate` and  `rJava`. This tool embeds a modified
+  `massPix` package for Galaxy only.
+
+- To test the tool, use data inside `test-data` or download test data (.ibd
+  and .imzML files) from the
   [MetaboLights](https://www.ebi.ac.uk/metabolights/) repository accession
   number [MTBLS487](https://www.ebi.ac.uk/metabolights/MTBLS487). 
-
-## To-Do ##
-
-- Dependencies will be handled by CONDA. This includes all R packages used.
-- Any other issues
 
 ## Authors, contributors & contacts ##
 
