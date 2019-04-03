@@ -2,8 +2,8 @@
 codes/
 
 # ignore imzML and ibd files recursively. 
-**.imzML
-**.ibd
+# **.imzML
+# **.ibd
 
 ## R History and session data files
 .RData
