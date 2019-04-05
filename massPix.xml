@@ -19,108 +19,100 @@
   <expand macro="requirements" />
   <expand macro="stdio" />
 
-  <!-- =============================================================== -->
   <command>
     <![CDATA[
-      ## cd $imzML_file.extra_files_path &&
-
-      ## ## Change uploaded imzml files. Also make them re-useable.
-      ## [ -f "data.imzml" ] ||  mv *imzml* data.imzml &&
-      ## [ -f "data.ibd" ] ||  mv *ibd* data.ibd &&
-     
       ln -s '${imzML_file.extra_files_path}/imzml' data.imzml &&
       ln -s '${imzML_file.extra_files_path}/ibd' data.ibd &&
 
-      Rscript ${__tool_directory__}/massPix.R
+      Rscript '${__tool_directory__}/massPix.R'
       --imzML_file data.imzml
-      ## --imzML_file $imzML_file.extra_files_path/data.imzml
 
-      --process $process.process_selector      
+      --process '$process.process_selector'      
       #if $process.process_selector:
 
           ## Making library
-          --ionisation_mode $process.make_library.ionisation_mode
-          --fixed $process.make_library.fixed
-          --fixed_FA $process.make_library.fixed_FA
+          --ionisation_mode '$process.make_library.ionisation_mode'
+          --fixed '$process.make_library.fixed'
+          --fixed_FA '$process.make_library.fixed_FA'
           
           ## mz_extractor
-          --thres_int $process.mz_extractor.thres_int 
-          --thres_low $process.mz_extractor.thres_low
-          --thres_high $process.mz_extractor.thres_high
+          --thres_int '$process.mz_extractor.thres_int' 
+          --thres_low '$process.mz_extractor.thres_low'
+          --thres_high '$process.mz_extractor.thres_high'
           
           ## peak_piucker_bin
-          --bin_ppm $process.peak_piucker_bin.bin_ppm
+          --bin_ppm '$process.peak_piucker_bin.bin_ppm'
           
           ## subset_image
-          --percentage_deiso $process.subset_image.percentage_deiso
+          --percentage_deiso '$process.subset_image.percentage_deiso'
           
           ## filter
-          --steps $process.filter.steps
-          --thres_filter $process.filter.thres_filter
+          --steps '$process.filter.steps'
+          --thres_filter '$process.filter.thres_filter'
           
           ## deisotope
-          --ppm $process.deisotope.ppm
-          --no_isotopes $process.deisotope.no_isotopes
-          --prop_1 $process.deisotope.prop_1
-          --prop_2 $process.deisotope.prop_2
-          --search_mod $process.deisotope.search_mod
+          --ppm '$process.deisotope.ppm'
+          --no_isotopes '$process.deisotope.no_isotopes'
+          --prop_1 '$process.deisotope.prop_1'
+          --prop_2 '$process.deisotope.prop_2'
+          --search_mod '$process.deisotope.search_mod'
           --mod '$process.deisotope.mod'
           ## wl-25-11-2017, Sat: Must add single quotes here since mod
           ##   content includes parentheses. Otherwise error:
           ##   syntax error near unexpected token `('
 
           ## annotate
-          --ppm_annotate $process.annotate.ppm_annotate
+          --ppm_annotate '$process.annotate.ppm_annotate'
           
           ## normalise
-          --norm_type $process.normalise.norm_type.norm_type_selector
+          --norm_type '$process.normalise.norm_type.norm_type_selector'
           #if $process.normalise.norm_type.norm_type_selector == 'standards':
-            --standards $process.normalise.norm_type.standards
+            --standards '$process.normalise.norm_type.standards'
           #end if
 
           ## save processed image 
-          --image_out $image_out
+          --image_out '$image_out'
           #if $process.rdata: 
-            --rdata_out $rdata_out
+            --rdata_out '$rdata_out'
           #end if
       #else:
-          --image_file $process.image_file
+          --image_file '$process.image_file'
       #end if
 
       ## plot
-      --scale $plot.scale
-      --nlevels $plot.nlevels
-      --res_spatial $plot.res_spatial
-      --rem_outliers $plot.rem_outliers
-      --summary $plot.summary
-      --title $plot.title
+      --scale '$plot.scale'
+      --nlevels '$plot.nlevels'
+      --res_spatial '$plot.res_spatial'
+      --rem_outliers '$plot.rem_outliers'
+      --summary '$plot.summary'
+      --title '$plot.title'
 
-      --pca $pca.pca_selector
+      --pca '$pca.pca_selector'
       #if $pca.pca_selector:
-          --pca_out $pca_out    
-          --scale_type $pca.pca_plot.scale_type
-          --transform $pca.pca_plot.transform
-          --PCnum $pca.pca_plot.PCnum
-          --loading $pca.pca_plot.loading
+          --pca_out '$pca_out'    
+          --scale_type '$pca.pca_plot.scale_type'
+          --transform '$pca.pca_plot.transform'
+          --PCnum '$pca.pca_plot.PCnum'
+          --loading '$pca.pca_plot.loading'
           #if $pca.pca_plot.loading:
-            --loading_out $loading_out
+            --loading_out '$loading_out'
           #end if  
       #end if
 
       --slice $slice.slice_selector
       #if $slice.slice_selector:
-          --slice_out $slice_out
-          --row $slice.slice_plot.row
+          --row '$slice.slice_plot.row'
+          --slice_out '$slice_out'
       #end if
 
-      --clus $cluster.cluster_selector
+      --clus '$cluster.cluster_selector'
       #if $cluster.cluster_selector:
-          --clus_out $clus_out
-          --cluster_type $cluster.cluster_plot.cluster_type
-          --clusters $cluster.cluster_plot.clusters
-          --intensity $cluster.cluster_plot.intensity
+          --clus_out '$clus_out'
+          --cluster_type '$cluster.cluster_plot.cluster_type'
+          --clusters '$cluster.cluster_plot.clusters'
+          --intensity '$cluster.cluster_plot.intensity'
           #if $cluster.cluster_plot.intensity:
-            --intensity_out $intensity_out
+            --intensity_out '$intensity_out'
           #end if  
       #end if
     ]]>
@@ -217,7 +209,7 @@
                  title="Filter to a matrix subset that includes
                         variables above a threshold of missing values">
           <param name="steps" type="float" value="0.05"
-                 min="0.05" max="0.05"
+                 min="0" max="1"
                  label="Steps for filtering"
                  help="This produces a sequence of values between 0 and 1 
                        that defines the thresholds of missing values to test. 
@@ -293,8 +285,6 @@
                        as bin width." /> 
         </section>
 
-        <!-- No parameters setting for contructImage. All done above. -->
-        
         <!-- ########################################################### -->
         <section name="normalise" title="Normalise image">
           <conditional name="norm_type">
@@ -318,12 +308,9 @@
                            example: 'c(1,3:21,35)' where ':' stands for the range. 
                            If the input is 'NULL', all rows will be used."/>
              </when> 
-            <when value="TIC">
-             </when> 
-             <when value="median">
-             </when> 
-            <when value="none">
-             </when> 
+             <when value="TIC" />
+             <when value="median" />
+             <when value="none" />
 
            </conditional>
          </section>
@@ -388,8 +375,8 @@
                  label="Select a method for scaling"
                  help="Mode of scaling. Valid argument: center, 
                        center and pareto, pareto and none">
-            <option value="c">Center</option>
             <option value="cs" selected="true">Center and Pareto</option>
+            <option value="c">Center</option>
             <option value="pareto">Pareto</option>
             <option value="none">None</option>
           </param>
@@ -410,8 +397,7 @@
 
       </when>
 
-      <when value="FALSE">
-      </when>
+      <when value="FALSE" />
 
     </conditional>
 
@@ -430,8 +416,7 @@
         </section>
       </when>
 
-      <when value="FALSE">
-      </when>
+      <when value="FALSE" />
 
     </conditional>
     
@@ -460,8 +445,7 @@
         </section>
       </when>
 
-      <when value="FALSE">
-      </when>
+      <when value="FALSE" />
 
     </conditional>
   </inputs>
@@ -521,27 +505,9 @@
   </outputs>
 
   <!-- =============================================================== -->
+  <!-- 'WriteXLS' gives different size although the contents are the same -->
+  <!-- different result in clustering because of randomness-->
   <tests>
-    <!-- test for not processing image. Just get PCA et al -->
-    <!-- 'WriteXLS' gives different size although the contents are the same -->
-    <!-- different result in clustering because of randomness-->
-    <test>
-      <expand macro="infile_imzml"/>
-      <param name="process_selector" value="FALSE" /> 
-      <param name="image_file" value="image_norm.tsv" />
-      <param name="pca_selector" value="TRUE" /> 
-      <param name="loading" value="TRUE" /> 
-      <param name="slice_selector" value="TRUE" /> 
-      <param name="clus_selector" value="TRUE" /> 
-      <param name="intensity" value="TRUE" /> 
-      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
-      <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
-      <!-- <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/> -->
-      <!-- <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/> -->
-      <!-- <output name="intensity_out" file="res/intensity.tsv" /> -->
-    </test>
-
-    <!-- test for processing image. -->
     <test>
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="TRUE" /> 
@@ -554,13 +520,47 @@
       <param name="clus_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
       <output name="image_out" file="res/image.tsv" />
-      <!-- <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" /> -->
+      <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
       <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
       <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
-      <!-- <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/> -->
-      <!-- <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/> -->
+      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
+      <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
+      <output name="intensity_out" file="res/intensity.tsv" />
+     </test>
+
+    <test>
+      <expand macro="infile_imzml"/>
+      <param name="process_selector" value="TRUE" /> 
+      <param name="rem_outliers" value="TRUE" /> 
+      <param name="summary" value="TRUE" /> 
+      <param name="rdata" value="TRUE" /> 
+      <param name="pca_selector" value="TRUE" /> 
+      <param name="loading" value="TRUE" /> 
+      <param name="slice_selector" value="TRUE" /> 
+      <param name="clus_selector" value="FALSE" /> 
+      <output name="image_out" file="res/image.tsv" />
+      <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
+      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
+      <!-- <output name="loading_out" file="res/loading_1.xlsx"  compare="sim_size"/> -->
+      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
+    </test>
+
+    <test>
+      <expand macro="infile_imzml"/>
+      <param name="process_selector" value="FALSE" /> 
+      <param name="image_file" value="image_norm.tsv" />
+      <param name="pca_selector" value="TRUE" /> 
+      <param name="loading" value="TRUE" /> 
+      <param name="slice_selector" value="TRUE" /> 
+      <param name="clus_selector" value="TRUE" /> 
+      <param name="intensity" value="TRUE" /> 
+      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
+      <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
+      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
+      <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
       <!-- <output name="intensity_out" file="res/intensity.tsv" /> -->
     </test>
+
   </tests>
 
   <!-- =============================================================== -->

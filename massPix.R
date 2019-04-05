@@ -21,6 +21,7 @@
 ## ==== General settings ====
 
 rm(list = ls(all = T))
+set.seed(123)
 
 #' flag for command-line use or not. If false, only for debug interactively.
 com_f <- T
@@ -159,8 +160,8 @@ if (com_f) {
 
     #' slice plot
     make_option("--slice", type = "logical", default = TRUE),
-    make_option("--slice_out", type = "character", default = "slice.pdf"),
     make_option("--row", type = "integer", default = 12),
+    make_option("--slice_out", type = "character", default = "slice.pdf"),
 
     #' cluster plot
     make_option("--clus", type = "logical", default = TRUE),
