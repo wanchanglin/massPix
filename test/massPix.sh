@@ -3,7 +3,7 @@
 # wl-25-03-2019, Mon: add output directory
 
 Rscript --vanilla ../massPix.R \
-  --imzML_file "../test-data/test_POS.imzML" \
+  --imzML_file "../test-data/test_pos.imzML" \
   --image_file "../test-data/image_norm.tsv" \
   --process TRUE \
   --rem_outliers TRUE \

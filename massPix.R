@@ -23,16 +23,16 @@
 rm(list = ls(all = T))
 
 #' flag for command-line use or not. If false, only for debug interactively.
-com_f <- TRUE
+com_f <- T
 
 #' galaxy will stop even if R has warning message
 options(warn = -1) #' disable R warning. Turn back: options(warn=0)
 
 #' Setup R error handling to go to stderr
-options(show.error.messages = F, error = function() {
-  cat(geterrmessage(), file = stderr())
-  q("no", 1, F)
-})
+#' options(show.error.messages = F, error = function() {
+#'   cat(geterrmessage(), file = stderr())
+#'   q("no", 1, F)
+#' })
 
 #' we need that to not crash galaxy with an UTF8 error on German LC settings.
 loc <- Sys.setlocale("LC_MESSAGES", "en_US.UTF-8")
@@ -80,7 +80,7 @@ if (com_f) {
     make_option("--imzML_file",
       type = "character",
       help = "Mass spectrometry imaging data to be processed.
-                  Currently imzML format is supported."
+              Currently imzML format is supported."
     ),
     make_option("--image_file",
       type = "character",
@@ -181,11 +181,11 @@ if (com_f) {
   opt <- list(
     #' -------------------------------------------------------------------
     #' input files. Note that using full path here.
-    imzML_file = paste0(home_dir, "test-data/test_POS.imzML"),
+    imzML_file = paste0(home_dir, "test-data/test_pos.imzML"),
     image_file = paste0(home_dir, "test-data/image_norm.tsv"),
 
     #' image data processing parameters
-    process = FALSE,
+    process = T,
 
     #' make library
     ionisation_mode = "positive",
