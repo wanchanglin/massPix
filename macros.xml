@@ -27,8 +27,8 @@
   </xml>
   <xml name="infile_imzml">
     <param name="imzML_file" value="" ftype="imzml">
-      <composite_data value="test_POS.imzML"/>
-      <composite_data value="test_POS.ibd"/>
+      <composite_data value="test_pos.imzML"/>
+      <composite_data value="test_pos.ibd"/>
     </param>
   </xml>
 

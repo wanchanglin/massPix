@@ -536,9 +536,9 @@
       <param name="intensity" value="TRUE" /> 
       <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
       <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
-      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
+      <!-- <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/> -->
       <!-- <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/> -->
-      <output name="intensity_out" file="res/intensity.tsv" />
+      <!-- <output name="intensity_out" file="res/intensity.tsv" /> -->
     </test>
 
     <!-- test for processing image. -->
@@ -553,7 +553,7 @@
       <param name="slice_selector" value="TRUE" /> 
       <param name="clus_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
-      <!-- <output name="image_out" file="res/image.tsv" /> -->
+      <output name="image_out" file="res/image.tsv" />
       <!-- <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" /> -->
       <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
       <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
