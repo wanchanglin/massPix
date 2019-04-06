@@ -1,6 +1,6 @@
 #!/bin/bash
 # wl-01-11-2017, Wed: Rscript test code for Linux
-# wl-25-03-2019, Mon: add output directory
+# wl-06-04-2019, Sat: process image and do not perform clustering
 
 Rscript --vanilla ../massPix.R \
   --imzML_file "../test-data/test_pos.imzML" \

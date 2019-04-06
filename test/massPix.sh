@@ -4,7 +4,6 @@
 
 Rscript --vanilla ../massPix.R \
   --imzML_file "../test-data/test_pos.imzML" \
-  --image_file "../test-data/image_norm.tsv" \
   --process TRUE \
   --rem_outliers TRUE \
   --summary TRUE \

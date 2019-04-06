@@ -6,6 +6,7 @@
     wl-14-02-2018, Wed: More modifications:
       1) change text file format from csv to tsv
       2) more control for output
+    wl-06-04-2019, Sat: add more tests for planemo. 
 -->
 <tool id="massPix" name="massPix" version="0.1.0">
   <description>
@@ -508,6 +509,7 @@
   <!-- 'WriteXLS' gives different size although the contents are the same -->
   <!-- different result in clustering because of randomness-->
   <tests>
+    <!-- full process image -->
     <test>
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="TRUE" /> 
@@ -527,7 +529,7 @@
       <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
       <output name="intensity_out" file="res/intensity.tsv" />
      </test>
-
+    <!-- process image and do not do clustering -->
     <test>
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="TRUE" /> 
@@ -544,7 +546,7 @@
       <!-- <output name="loading_out" file="res/loading_1.xlsx"  compare="sim_size"/> -->
       <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
     </test>
-
+    <!-- pca and clustering on processed image -->
     <test>
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="FALSE" /> 
@@ -554,13 +556,12 @@
       <param name="slice_selector" value="TRUE" /> 
       <param name="clus_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
-      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
-      <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
-      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
-      <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
-      <!-- <output name="intensity_out" file="res/intensity.tsv" /> -->
+      <!-- <output name="pca_out" file="res/pca_1.pdf"  compare="sim_size"/> -->
+      <!-- <output name="loading_out" file="res/loading_1.xlsx"  compare="sim_size"/> -->
+      <output name="slice_out" file="res/slice_1.pdf"  compare="sim_size"/>
+      <output name="clus_out" file="res/clus_1.pdf"  compare="sim_size"/>
+      <output name="intensity_out" file="res/intensity_1.tsv" />
     </test>
-
   </tests>
 
   <!-- =============================================================== -->
