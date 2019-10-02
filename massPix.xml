@@ -610,15 +610,18 @@ carried out using MS/MS is required, where this appropriate.
 massPix_ has the further capability to perform difference matching on
 deisotoped features to search for mass differences associated with
 measurement-introduced alternation (e.g. loss of headgroup, loss of water)
-or biological modifications (e.g. oxidation). The final image DIMS data**
+or biological modifications (e.g. oxidation). 
 
-The lipidomics data format is ``mzXML`` which can be converted from raw data
-by ``MSConvert`` of ProteoWizard_. Each file represents one sample or
-replicate. Select multiple ``mzXML`` files for processing. The input data
-will be either positive or negative mode. They cannot be mixed up.
-
-
-.. _ProteoWizard: http://proteowizard.sourceforge.net/
+The final image is constructed, based on all pixels. Ion intensities are 
+then normalised either to the median or total ion count, or to the 
+average intensity of a set of standard ions. 
+Single ion images can be produced, or 
+normalised intensities used to create multivariate statistical images 
+based on k-means clustering or PCA following 
+centering and Pareto scaling. 
+The analysis can be readily customised by replacing default parameters 
+for filtering, normalisation and scaling, library composition, lipid 
+assignment and image reporting.
 
 Inputs
 ------

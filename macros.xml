@@ -1,10 +1,11 @@
 <macros>
   <xml name="requirements">
     <requirements>
-      <requirement type="package">r-optparse</requirement>
-      <requirement type="package">r-writexls</requirement>
-      <requirement type="package">r-rjava</requirement>
-      <requirement type="package">r-calibrate</requirement>
+      <requirement type="package" version="1.6.4">r-optparse</requirement>
+      <requirement type="package" version="5.0.0">r-writexls</requirement>
+      <requirement type="package" version="0.9_11">r-rjava</requirement>
+      <requirement type="package" version="1.7.5">r-calibrate</requirement>
+      <requirement type="package" version="8.0.112">java-jdk</requirement>
     </requirements>
   </xml>
   <xml name="stdio">
