@@ -667,6 +667,8 @@ peak      annotated                          isotope  modification              
 577.5277                                     [10][M]                                         147309.77849969   144416.617387283
 ========= =================================  =======  =====================================  ================  ================
 
+      |
+
 **\2. R running results** (OPTIONAL)
 
 All running results are saved as an R file ``rdata`` for advanced user to
