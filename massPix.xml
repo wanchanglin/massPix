@@ -29,7 +29,7 @@
       --imzML_file data.imzml
 
       --process '$process.process_selector'      
-      #if $process.process_selector:
+      #if $process.process_selector =="TRUE":
 
           ## Making library
           --ionisation_mode '$process.make_library.ionisation_mode'
@@ -57,10 +57,27 @@
           --prop_1 '$process.deisotope.prop_1'
           --prop_2 '$process.deisotope.prop_2'
           --search_mod '$process.deisotope.search_mod'
-          --mod '$process.deisotope.mod'
+          ##--mod '$process.deisotope.mod'
           ## wl-25-11-2017, Sat: Must add single quotes here since mod
           ##   content includes parentheses. Otherwise error:
           ##   syntax error near unexpected token `('
+
+        #set $NL_var = 'F'
+        #set $label_var = 'F'
+        #set $desat_var = 'F'
+        #set $oxidised_var = 'F'
+
+        #if 'nl' in str($process.deisotope.mod): 
+            #set $NL_var = 'T'
+        #elif 'lab' in str($process.deisotope.mod):
+            #set $label_var = 'T'
+        #elif 'des' in str($process.deisotope.mod): 
+            #set $desat_var = 'T'
+        #elif 'ox' in str($process.deisotope.mod): 
+            #set $oxidised_var = 'T'
+        #end if
+
+          --mod "c(NL = $NL_var, label = $label_var, oxidised = $oxidised_var, desat = $desat_var)"
 
           ## annotate
           --ppm_annotate '$process.annotate.ppm_annotate'
@@ -89,30 +106,30 @@
       --title '$plot.title'
 
       --pca '$pca.pca_selector'
-      #if $pca.pca_selector:
+      #if $pca.pca_selector =="TRUE":
           --pca_out '$pca_out'    
-          --scale_type '$pca.pca_plot.scale_type'
-          --transform '$pca.pca_plot.transform'
-          --PCnum '$pca.pca_plot.PCnum'
-          --loading '$pca.pca_plot.loading'
-          #if $pca.pca_plot.loading:
+          --scale_type '$pca.scale_type'
+          --transform '$pca.transform'
+          --PCnum '$pca.PCnum'
+          --loading '$pca.loading'
+          #if $pca.loading:
             --loading_out '$loading_out'
           #end if  
       #end if
 
-      --slice $slice.slice_selector
-      #if $slice.slice_selector:
-          --row '$slice.slice_plot.row'
+      --slice $slice_selector
+      #if $slice_selector:
+          --row '$row'
           --slice_out '$slice_out'
       #end if
 
       --clus '$cluster.cluster_selector'
-      #if $cluster.cluster_selector:
+      #if $cluster.cluster_selector =="TRUE":
           --clus_out '$clus_out'
-          --cluster_type '$cluster.cluster_plot.cluster_type'
-          --clusters '$cluster.cluster_plot.clusters'
-          --intensity '$cluster.cluster_plot.intensity'
-          #if $cluster.cluster_plot.intensity:
+          --cluster_type '$cluster.cluster_type'
+          --clusters '$cluster.clusters'
+          --intensity '$cluster.intensity'
+          #if $cluster.intensity:
             --intensity_out '$intensity_out'
           #end if  
       #end if
@@ -128,15 +145,18 @@
                  data file (*.ibd) contains the mass spectral data. The two
                  files must be uploaded as an 'imzml' 'composite' data type 
                  via 'Get Data'. " />
-    
-    <conditional name="process">
-      <param label="Process mass spectrometry imaging data"
-             name="process_selector"
-             type="boolean" truevalue="TRUE" falsevalue="FALSE" checked="true"
-             help="Choose if you want to process MSI data or only visualise
-                   processed MSI data." />
 
-      <when value="TRUE">
+        <conditional name="process">
+            <param label="Process mass spectrometry imaging data"
+                 name="process_selector"
+                 type="select"
+                 help="Choose if you want to process MSI data or only visualise
+                       processed MSI data." >
+                <option value="TRUE" selected="True">perform processing</option>
+                <option value="FALSE">visualisation of processed file</option>
+            </param>
+
+            <when value="TRUE">
 
         <!-- ########################################################### -->
         <section name="make_library" title="Making library" > 
@@ -144,9 +164,10 @@
           <param name="ionisation_mode" type="select"
                  label="Specify ionisation mode"
                  help="Choose 'positive' or 'negative', will determine
-                       which lipid classes are in database" >
-            <option value="positive" selected="True">positive</option>
-            <option value="negative">negative</option>
+                       which lipid classes are in database"
+                 display="radio">
+                <option value="positive" selected="True">positive</option>
+                <option value="negative">negative</option>
           </param>
 
           <param name="fixed" type="boolean" 
@@ -265,14 +286,21 @@
                  label="Search modifications"
                  help="Search modifications T/F."/>
 
-          <param name="mod" type="text"
-                 value="c(NL = T, label = F, oxidised = F, desat = F)"
+
+          <param name="mod" type="select"
+                 optional="True"
+                 display="checkboxes"
+                 multiple="True"
                  label="Specify modifications to search"
-                 help="Modifications to search eg.
-                       c(NL=T, label=F, oxidised=T,desat=T). NL = neutral loss of
-                       head group or water; label = 13C palmitate lablled; desat =
-                       1 to 4 additional desaturations. Set to true (T) or false (F)."/>
-          <!-- wl-19-11-2017: Should we change the type in the future? -->
+                 help="Modifications to search eg.neutral loss of
+                       head group or water; 13C palmitate lablled;
+                       1 to 4 additional desaturations; oxidised">
+             <option value="nl" selected="True">Neutral loss</option>
+             <option value="lab">13C palmitate labelled</option>
+             <option value="des">1 to 4 additional desaturations</option>
+             <option value="ox">Oxidised</option>
+        </param>
+
         </section>
 
         <!-- ########################################################### -->
@@ -365,70 +393,63 @@
     </section>
     
     <conditional name="pca">
-      <param name="pca_selector"
-             type="boolean" truevalue="TRUE" falsevalue="FALSE" checked="true"
+        <param name="pca_selector"
+             type="select"
              label="Generate PCA plot"
-             help="Select generating a PCA plot or not" />
+             help="Select generating a PCA plot or not" >
+                <option value="TRUE" selected="True">Generate PCA plot</option>
+                <option value="FALSE">no PCA plot</option>
+            </param>
 
-      <when value="TRUE">
-        <section name="pca_plot" title="Generate a PCA plot">
-          <param name="scale_type" type="select"
-                 label="Select a method for scaling"
-                 help="Mode of scaling. Valid argument: center, 
-                       center and pareto, pareto and none">
-            <option value="cs" selected="true">Center and Pareto</option>
-            <option value="c">Center</option>
-            <option value="pareto">Pareto</option>
-            <option value="none">None</option>
-          </param>
+            <when value="TRUE">
+                  <param name="scale_type" type="select"
+                         label="Select a method for scaling"
+                         help="Mode of scaling. Valid argument: center, 
+                               center and pareto, pareto and none">
+                    <option value="cs" selected="true">Center and Pareto</option>
+                    <option value="c">Center</option>
+                    <option value="pareto">Pareto</option>
+                    <option value="none">None</option>
+                  </param>
 
-          <param name="transform" type="boolean" 
-                 truevalue="TRUE" falsevalue="FALSE" checked="false"
-                 label="Transformation or not"
-                 help="Log transform data T/F"/>
+                  <param name="transform" type="boolean" 
+                         truevalue="TRUE" falsevalue="FALSE" checked="false"
+                         label="Transformation or not"
+                         help="Log transform data T/F"/>
 
-          <param name="PCnum" type="integer" value="5" label="Specify PCs"
-                 help="Number of PCs to consider" /> 
+                  <param name="PCnum" type="integer" value="5" label="Specify PCs"
+                         help="Number of PCs to consider" /> 
 
-          <param name="loading" type="boolean" 
-                 truevalue="TRUE" falsevalue="FALSE" checked="true"
-                 label="Save loading values"
-                 help="Save loading values for inspection."/>
-        </section>
+                  <param name="loading" type="boolean" 
+                         truevalue="TRUE" falsevalue="FALSE" checked="true"
+                         label="Save loading values"
+                         help="Save loading values for inspection."/>
+            </when>
 
-      </when>
+            <when value="FALSE" />
+        </conditional>
 
-      <when value="FALSE" />
+        <param name="slice_selector" type="boolean" 
+               truevalue="TRUE" falsevalue="FALSE" checked="true"
+               label="Plot ion slice or not"
+               help="Make ion slice if requested" >
+        </param>
 
-    </conditional>
-
-    <conditional name="slice"> 
-      <param name="slice_selector" type="boolean" 
-             truevalue="TRUE" falsevalue="FALSE" checked="true"
-             label="Plot ion slice or not"
-             help="Make ion slice if requested" />
-
-      <when value="TRUE">
-        <section name="slice_plot" title="Plot ion slice">
-          <param name="row" type="integer" value="12"
-                 label="Specify which row for plotting"
-                 help="Row number to plot - this can be determined by 
-                       opening the processed image data file."/>
-        </section>
-      </when>
-
-      <when value="FALSE" />
-
-    </conditional>
+        <param name="row" type="integer" value="12"
+             label="For ion slice plotting: specify row"
+             help="Row number to plot - this can be determined by 
+                   opening the processed image data file."
+             optional="True"/>
     
     <conditional name="cluster"> 
-      <param name="cluster_selector" type="boolean" 
-             truevalue="TRUE" falsevalue="FALSE" checked="true"
-             label="Perform clustering or not"
-             help="Perform clustering or not" />
+        <param name="cluster_selector" type="select" 
+               label="Perform clustering or not"
+               help="Perform clustering or not" >
+            <option value="TRUE" selected="True">Perform clustering</option>
+            <option value="FALSE">No clustering</option>
+        </param>
 
       <when value="TRUE">
-        <section name="cluster_plot" title="Clustering plot">
           <param name="cluster_type" type="select"
                  label="Select a clustering method"
                  help="Currently only 'kmeans' supported" >
@@ -443,7 +464,6 @@
                  truevalue="TRUE" falsevalue="FALSE" checked="true"
                  label="Save cluster intensity values"
                  help="Save cluster intensity for inspection."/>
-        </section>
       </when>
 
       <when value="FALSE" />
@@ -455,14 +475,14 @@
   <outputs>
     <data format="tabular" name="image_out"
           label="Processed imaging data on ${on_string}">
-      <filter> process['process_selector'] == True </filter>
+      <filter> process['process_selector'] == "TRUE" </filter>
     </data>
     
     <data format="rdata" name="rdata_out"
           label="R running results on ${on_string}">
           <filter> 
             ((
-            process['process_selector'] == True and
+            process['process_selector'] == "TRUE" and
             process['rdata'] == True
             ))
           </filter>
@@ -470,35 +490,35 @@
 
     <data format="pdf" name="pca_out"
           label="PCA plots on ${on_string}">
-      <filter> pca['pca_selector'] == True </filter>
+      <filter> pca['pca_selector'] == "TRUE" </filter>
     </data>
 
     <data format="xlsx" name="loading_out"
           label="PCA loading file on ${on_string}">
           <filter> 
             ((
-            pca['pca_selector'] == True and
-            pca['pca_plot']['loading'] == True
+            pca['pca_selector'] == "TRUE" and
+            pca['loading'] == True
             ))
           </filter>
     </data>
 
     <data format="pdf" name="slice_out"
           label="Slice plots on ${on_string}">
-      <filter> slice['slice_selector'] == True </filter>
+      <filter> slice_selector = True </filter>
     </data>
 
     <data format="pdf" name="clus_out"
           label="Cluster plots on ${on_string}">
-      <filter> cluster['cluster_selector'] == True </filter>
+      <filter> cluster['cluster_selector'] == "TRUE" </filter>
     </data>
 
     <data format="tabular" name="intensity_out"
           label="Cluster intensity file on ${on_string}">
           <filter> 
             ((
-            cluster['cluster_selector'] == True and
-            cluster['cluster_plot']['intensity'] == True
+            cluster['cluster_selector'] == "TRUE" and
+            cluster['intensity'] == True
             ))
           </filter>
     </data>
@@ -510,7 +530,7 @@
   <!-- different result in clustering because of randomness-->
   <tests>
     <!-- full process image -->
-    <test>
+    <test expect_num_outputs="7">
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="TRUE" /> 
       <param name="rem_outliers" value="TRUE" /> 
@@ -519,18 +539,17 @@
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <param name="slice_selector" value="TRUE" /> 
-      <param name="clus_selector" value="TRUE" /> 
+      <param name="cluster_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
       <output name="image_out" file="res/image.tsv" />
       <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
-      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
-      <!-- <output name="loading_out" file="res/loading.xlsx"  compare="sim_size"/> -->
-      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
-      <output name="clus_out" file="res/clus.pdf"  compare="sim_size"/>
+      <output name="pca_out" file="res/pca.pdf" compare="sim_size"/>
+      <!-- <output name="loading_out" file="res/loading.xlsx" compare="sim_size"/> -->
+      <output name="slice_out" file="res/slice.pdf" compare="sim_size"/>
+      <output name="clus_out" file="res/clus.pdf" compare="sim_size"/>
       <output name="intensity_out" file="res/intensity.tsv" />
      </test>
-    <!-- process image and do not do clustering -->
-    <test>
+    <test expect_num_outputs="5">
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="TRUE" /> 
       <param name="rem_outliers" value="TRUE" /> 
@@ -539,7 +558,7 @@
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <param name="slice_selector" value="TRUE" /> 
-      <param name="clus_selector" value="FALSE" /> 
+      <param name="cluster_selector" value="FALSE" /> 
       <output name="image_out" file="res/image.tsv" />
       <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
       <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
@@ -547,14 +566,14 @@
       <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
     </test>
     <!-- pca and clustering on processed image -->
-    <test>
+    <test expect_num_outputs="5">
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="FALSE" /> 
       <param name="image_file" value="image_norm.tsv" />
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <param name="slice_selector" value="TRUE" /> 
-      <param name="clus_selector" value="TRUE" /> 
+      <param name="cluster_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
       <!-- <output name="pca_out" file="res/pca_1.pdf"  compare="sim_size"/> -->
       <!-- <output name="loading_out" file="res/loading_1.xlsx"  compare="sim_size"/> -->
