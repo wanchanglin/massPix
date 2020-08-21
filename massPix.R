@@ -11,6 +11,10 @@
 #' wl-28-03-2019, Thu: apply style_file() to reformat this script and use
 #'  vim's folding as outline view. Without reformatng, the folding
 #'  is messy.
+#' wl-19-08-2020, Wed: review and drop WriteXLS. And find out PCA loadings
+#'  will lead the failure of Galaxy planemo test. Round it and planemo test
+#'  passes.
+#' wl-20-08-2020, Thu: debug deisotope search mod
 #' Usages:
 #'  1.) For command line and galaxy, change `com_f` to TRUE.
 #'  2.) For command line, change `home_dir` as appropriate
@@ -42,7 +46,6 @@ suppressPackageStartupMessages({
   library(optparse)
   library(calibrate)
   library(rJava)
-  library(WriteXLS)
 })
 
 ## ==== Command line or interactive setting ====
@@ -156,7 +159,7 @@ if (com_f) {
     make_option("--transform", type = "logical", default = FALSE),
     make_option("--PCnum", type = "integer", default = 5),
     make_option("--loading", type = "logical", default = TRUE),
-    make_option("--loading_out", type = "character", default = "loading.xlsx"),
+    make_option("--loading_out", type = "character", default = "loading.tsv"),
 
     #' slice plot
     make_option("--slice", type = "logical", default = TRUE),
@@ -178,11 +181,13 @@ if (com_f) {
   )
 } else {
   #' home_dir <- "C:/R_lwc/massPix/"         #' for windows
-  home_dir <- "/home/wl/my_galaxy/massPix/" #' for linux. must be case-sensitive
+  home_dir <- "/home/wl/R_lwc/r_data/cam1/massPix/"
+  ## home_dir <- "/home/wl/my_galaxy/massPix/"
   opt <- list(
     #' -------------------------------------------------------------------
     #' input files. Note that using full path here.
-    imzML_file = paste0(home_dir, "test-data/test_pos.imzML"),
+    imzML_file = paste0(home_dir, "test-data/cut_masspix.imzML"),
+    ## imzML_file = paste0(home_dir, "test-data/test_pos.imzML"),
     image_file = paste0(home_dir, "test-data/image_norm.tsv"),
 
     #' image data processing parameters
@@ -237,7 +242,7 @@ if (com_f) {
     transform = FALSE,
     PCnum = 5,
     loading = TRUE,
-    loading_out = paste0(home_dir, "test-data/res/loading.xlsx"),
+    loading_out = paste0(home_dir, "test-data/res/loading.tsv"),
 
     #' slice plot
     slice = TRUE,
@@ -253,7 +258,7 @@ if (com_f) {
     intensity_out = paste0(home_dir, "test-data/res/intensity.tsv")
   )
 }
-#' opt
+print(opt)
 
 suppressPackageStartupMessages({
   source(paste0(home_dir, "all_massPix.R"))
@@ -262,10 +267,10 @@ suppressPackageStartupMessages({
 ## ==== Pre-processing ====
 
 #' imzML converter
-lib_dir <- paste0(home_dir, "libraries/")
-imzMLparse <- paste0(home_dir, "imzMLConverter/imzMLConverter.jar")
+lib_dir <- paste0(home_dir, "lib/")
+imzMLparse <- paste0(home_dir, "lib/imzMLConverter.jar")
 
-options(java.parameters = "Xmx4g")
+options(java.parameters = "-Xmx2g")
 
 #' enforce the following required arguments
 if (is.null(opt$imzML_file)) {
@@ -284,19 +289,23 @@ if (!opt$process) {
 }
 
 #' read in library files
-read <- read.csv(paste(lib_dir, "lib_FA.csv", sep = "/"), sep = ",", header = T)
+read <- read.csv(paste(lib_dir, "lib_FA.csv", sep = "/"), sep = ",", 
+                 header = T)
 lookup_FA <- read[, 2:4]
 row.names(lookup_FA) <- read[, 1]
 
-read <- read.csv(paste(lib_dir, "lib_class.csv", sep = "/"), sep = ",", header = T)
+read <- read.csv(paste(lib_dir, "lib_class.csv", sep = "/"), sep = ",", 
+                 header = T)
 lookup_lipid_class <- read[, 2:3]
 row.names(lookup_lipid_class) <- read[, 1]
 
-read <- read.csv(paste(lib_dir, "lib_element.csv", sep = "/"), sep = ",", header = T)
+read <- read.csv(paste(lib_dir, "lib_element.csv", sep = "/"), sep = ",", 
+                 header = T)
 lookup_element <- read[, 2:3]
 row.names(lookup_element) <- read[, 1]
 
-read <- read.csv(paste(lib_dir, "lib_modification.csv", sep = "/"), sep = ",", header = T)
+read <- read.csv(paste(lib_dir, "lib_modification.csv", sep = "/"), 
+                 sep = ",", header = T)
 lookup_mod <- read[, 2:ncol(read)]
 row.names(lookup_mod) <- read[, 1]
 
@@ -463,24 +472,23 @@ if (opt$pca) {
     )
     labs.all <- as.numeric(as.vector(image.scale[, 1]))
 
-    #' for (i in 1:opt$PCnum){
-    #'   loadings <- pca$loadings[,i]
-    #'   loadings <- cbind(loadings, labs.all)
-    #'   write.csv(loadings, file=paste0(home_dir,"/res/", "loadings_PC",i,".csv"))
-    #' }
-
     #' wl-05-02-2018, Mon: save as one excel file
-    ld <- lapply(1:opt$PCnum, function(i) {
-      loadings <- pca$loadings[, i]
+    #' wl-19-08-2020, Wed: drop R package WriteXLS and round loadings.
+    #' without it, galaxy's 'planemo test' will definitely fail.
+    ld <- lapply(1:opt$PCnum, function(x) {
+      loadings <- round(pca$loadings[, x], digits = 4)
       loadings <- cbind(loadings, labs.all)
       loadings <- as.data.frame(loadings)
     })
     names(ld) <- paste0("PC", 1:opt$PCnum)
+    ## WriteXLS::WriteXLS(ld, ExcelFileName = opt$loading_out, row.names = F,
+    ##                    FreezeRow = 1)
 
-    WriteXLS(ld,
-      ExcelFileName = opt$loading_out,
-      row.names = F, FreezeRow = 1
-    )
+    tmp <- lapply(names(ld), function(x){
+      res <- cbind(PC=x, ld[[x]])
+    })
+    tmp <- do.call("rbind", tmp)
+    write.table(tmp, file = opt$loading_out, sep = "\t", row.name = FALSE)
   }
 }
 
@@ -521,3 +529,4 @@ if (opt$clus) {
     write.table(tmp, file = opt$intensity_out, sep = "\t", row.name = FALSE)
   }
 }
+

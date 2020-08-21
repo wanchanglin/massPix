@@ -7,6 +7,7 @@
       1) change text file format from csv to tsv
       2) more control for output
     wl-06-04-2019, Sat: add more tests for planemo. 
+    wl-21-08-2020, Fri: correct mistakes in deisotoping search mod
 -->
 <tool id="massPix" name="massPix" version="0.1.0">
   <description>
@@ -57,25 +58,31 @@
           --prop_1 '$process.deisotope.prop_1'
           --prop_2 '$process.deisotope.prop_2'
           --search_mod '$process.deisotope.search_mod'
+
           ##--mod '$process.deisotope.mod'
           ## wl-25-11-2017, Sat: Must add single quotes here since mod
           ##   content includes parentheses. Otherwise error:
           ##   syntax error near unexpected token `('
 
-        #set $NL_var = 'F'
-        #set $label_var = 'F'
-        #set $desat_var = 'F'
-        #set $oxidised_var = 'F'
-
-        #if 'nl' in str($process.deisotope.mod): 
-            #set $NL_var = 'T'
-        #elif 'lab' in str($process.deisotope.mod):
-            #set $label_var = 'T'
-        #elif 'des' in str($process.deisotope.mod): 
-            #set $desat_var = 'T'
-        #elif 'ox' in str($process.deisotope.mod): 
-            #set $oxidised_var = 'T'
-        #end if
+          ## 04-10-2019, Fri: added by Melanie Foll. Great job.
+          #set $NL_var = 'F'
+          #set $label_var = 'F'
+          #set $desat_var = 'F'
+          #set $oxidised_var = 'F'
+          
+          ## 21-08-2020, Fri: correct a mistake by wl
+          #if 'nl' in str($process.deisotope.mod).split(","): 
+              #set $NL_var = 'T'
+          #end if
+          #if 'lab' in str($process.deisotope.mod).split(","):
+              #set $label_var = 'T'
+          #end if
+          #if 'des' in str($process.deisotope.mod).split(","): 
+              #set $desat_var = 'T'
+          #end if
+          #if 'ox' in str($process.deisotope.mod).split(","): 
+              #set $oxidised_var = 'T'
+          #end if
 
           --mod "c(NL = $NL_var, label = $label_var, oxidised = $oxidised_var, desat = $desat_var)"
 
@@ -288,18 +295,16 @@
 
 
           <param name="mod" type="select"
-                 optional="True"
-                 display="checkboxes"
-                 multiple="True"
+                 optional="True" display="checkboxes" multiple="True"
                  label="Specify modifications to search"
                  help="Modifications to search eg.neutral loss of
                        head group or water; 13C palmitate lablled;
                        1 to 4 additional desaturations; oxidised">
-             <option value="nl" selected="True">Neutral loss</option>
-             <option value="lab">13C palmitate labelled</option>
-             <option value="des">1 to 4 additional desaturations</option>
-             <option value="ox">Oxidised</option>
-        </param>
+              <option value="nl" selected="True">Neutral loss</option>
+              <option value="lab">13C palmitate labelled</option>
+              <option value="ox"> Oxidised</option>
+              <option value="des">1 to 4 additional desaturations</option>
+          </param>
 
         </section>
 
@@ -493,7 +498,7 @@
       <filter> pca['pca_selector'] == "TRUE" </filter>
     </data>
 
-    <data format="xlsx" name="loading_out"
+    <data format="tabular" name="loading_out"
           label="PCA loading file on ${on_string}">
           <filter> 
             ((
@@ -544,42 +549,52 @@
       <output name="image_out" file="res/image.tsv" />
       <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
       <output name="pca_out" file="res/pca.pdf" compare="sim_size"/>
-      <!-- <output name="loading_out" file="res/loading.xlsx" compare="sim_size"/> -->
+      <output name="loading_out" file="res/loading.tsv" />
       <output name="slice_out" file="res/slice.pdf" compare="sim_size"/>
       <output name="clus_out" file="res/clus.pdf" compare="sim_size"/>
       <output name="intensity_out" file="res/intensity.tsv" />
      </test>
-    <test expect_num_outputs="5">
+
+    <!-- full process image: deisotope search mod -->
+    <test expect_num_outputs="7">
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="TRUE" /> 
+      <param name="search_mod" value="TRUE" /> 
+      <param name="mod" value="nl,ox,des" /> 
       <param name="rem_outliers" value="TRUE" /> 
       <param name="summary" value="TRUE" /> 
       <param name="rdata" value="TRUE" /> 
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <param name="slice_selector" value="TRUE" /> 
-      <param name="cluster_selector" value="FALSE" /> 
-      <output name="image_out" file="res/image.tsv" />
-      <output name="rdata_out" file="res/r_running.rdata" compare="sim_size" />
-      <output name="pca_out" file="res/pca.pdf"  compare="sim_size"/>
-      <!-- <output name="loading_out" file="res/loading_1.xlsx"  compare="sim_size"/> -->
-      <output name="slice_out" file="res/slice.pdf"  compare="sim_size"/>
-    </test>
+      <param name="cluster_selector" value="TRUE" /> 
+      <param name="intensity" value="TRUE" /> 
+      <output name="image_out" file="res/image_1.tsv" />
+      <output name="rdata_out" file="res/r_running_1.rdata" compare="sim_size" />
+      <output name="pca_out" file="res/pca_1.pdf" compare="sim_size"/>
+      <output name="loading_out" file="res/loading_1.tsv" />
+      <output name="slice_out" file="res/slice_1.pdf" compare="sim_size"/>
+      <output name="clus_out" file="res/clus_1.pdf" compare="sim_size"/>
+      <output name="intensity_out" file="res/intensity_1.tsv" />
+     </test>
+
     <!-- pca and clustering on processed image -->
     <test expect_num_outputs="5">
       <expand macro="infile_imzml"/>
       <param name="process_selector" value="FALSE" /> 
       <param name="image_file" value="image_norm.tsv" />
+      <param name="rem_outliers" value="TRUE" /> 
+      <param name="summary" value="TRUE" /> 
       <param name="pca_selector" value="TRUE" /> 
       <param name="loading" value="TRUE" /> 
       <param name="slice_selector" value="TRUE" /> 
       <param name="cluster_selector" value="TRUE" /> 
       <param name="intensity" value="TRUE" /> 
-      <!-- <output name="pca_out" file="res/pca_1.pdf"  compare="sim_size"/> -->
-      <!-- <output name="loading_out" file="res/loading_1.xlsx"  compare="sim_size"/> -->
-      <output name="slice_out" file="res/slice_1.pdf"  compare="sim_size"/>
-      <output name="clus_out" file="res/clus_1.pdf"  compare="sim_size"/>
-      <output name="intensity_out" file="res/intensity_1.tsv" />
+      <output name="pca_out" file="res/pca_2.pdf"  compare="sim_size"/>
+      <output name="loading_out" file="res/loading_2.tsv" />
+      <output name="slice_out" file="res/slice_2.pdf"  compare="sim_size"/>
+      <output name="clus_out" file="res/clus_2.pdf"  compare="sim_size"/>
+      <output name="intensity_out" file="res/intensity_2.tsv" />
     </test>
   </tests>
 
