@@ -3,7 +3,7 @@
 # wl-06-04-2019, Sat: pca and cluster analysis on processed image
 # wl-20-08-2020, Thu: use small data set
 
-Rscript --vanilla ../massPix.R \
+Rscript --vanilla ../masspix.R \
   --imzML_file "../test-data/cut_masspix.imzML" \
   --process FALSE \
   --image_file "../test-data/image_norm.tsv" \

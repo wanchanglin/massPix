@@ -3,7 +3,7 @@
 # wl-25-03-2019, Mon: add output directory
 # wl-20-08-2020, Thu: use small data set
 
-Rscript --vanilla ../massPix.R \
+Rscript --vanilla ../masspix.R \
   --imzML_file "../test-data/cut_masspix.imzML" \
   --process TRUE \
   --rem_outliers TRUE \

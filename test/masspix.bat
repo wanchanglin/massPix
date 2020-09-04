@@ -1,7 +1,7 @@
 rem wl-01-11-2017, Wed: Rscript test code for Windows.
 rem wl-25-03-2019, Mon: add output directory
 
-Rscript --vanilla ../massPix.R ^
+Rscript --vanilla ../masspix.R ^
   --imzML_file "../test-data/test_pos.imzML" ^
   --image_file "../test-data/image_norm.tsv" ^
   --process TRUE ^

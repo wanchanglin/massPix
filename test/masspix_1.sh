@@ -4,7 +4,7 @@
 # wl-20-08-2020, Thu: use small data set
 # wl-20-08-2020, Thu: change the  deisotope search mode
 
-Rscript --vanilla ../massPix.R \
+Rscript --vanilla ../masspix.R \
   --imzML_file "../test-data/cut_masspix.imzML" \
   --process TRUE \
   --search_mod TRUE \

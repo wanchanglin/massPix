@@ -28,7 +28,7 @@ rm(list = ls(all = T))
 set.seed(123)
 
 #' flag for command-line use or not. If false, only for debug interactively.
-com_f <- T
+com_f <- F
 
 #' galaxy will stop even if R has warning message
 options(warn = -1) #' disable R warning. Turn back: options(warn=0)
@@ -181,8 +181,8 @@ if (com_f) {
   )
 } else {
   #' home_dir <- "C:/R_lwc/massPix/"         #' for windows
-  home_dir <- "/home/wl/R_lwc/r_data/cam1/massPix/"
-  ## home_dir <- "/home/wl/my_galaxy/massPix/"
+  #' home_dir <- "/home/wl/R_lwc/r_data/cam1/massPix/"
+  home_dir <- "/home/wl/my_galaxy/masspix/"
   opt <- list(
     #' -------------------------------------------------------------------
     #' input files. Note that using full path here.
@@ -222,10 +222,10 @@ if (com_f) {
     standards = "NULL",
 
     #' output parameters and files
-    image_out = paste0(home_dir, "test-data/res/image.tsv"),
+    image_out = paste0(home_dir, "test-data/res/deb_image.tsv"),
 
     rdata = TRUE,
-    rdata_out = paste0(home_dir, "test-data/res/r_running.rdata"),
+    rdata_out = paste0(home_dir, "test-data/res/deb_r_running.rdata"),
 
     #' plot parameters
     scale = 100,
@@ -237,31 +237,31 @@ if (com_f) {
 
     #' pca plot
     pca = TRUE,
-    pca_out = paste0(home_dir, "test-data/res/pca.pdf"),
+    pca_out = paste0(home_dir, "test-data/res/deb_pca.pdf"),
     scale_type = "cs",
     transform = FALSE,
     PCnum = 5,
     loading = TRUE,
-    loading_out = paste0(home_dir, "test-data/res/loading.tsv"),
+    loading_out = paste0(home_dir, "test-data/res/deb_loading.tsv"),
 
     #' slice plot
     slice = TRUE,
-    slice_out = paste0(home_dir, "test-data/res/slice.pdf"),
+    slice_out = paste0(home_dir, "test-data/res/deb_slice.pdf"),
     row = 12,
 
     #' cluster plot
     clus = TRUE,
-    clus_out = paste0(home_dir, "test-data/res/clus.pdf"),
+    clus_out = paste0(home_dir, "test-data/res/deb_clus.pdf"),
     cluster_type = "kmeans",
     clusters = 5,
     intensity = TRUE,
-    intensity_out = paste0(home_dir, "test-data/res/intensity.tsv")
+    intensity_out = paste0(home_dir, "test-data/res/deb_intensity.tsv")
   )
 }
 print(opt)
 
 suppressPackageStartupMessages({
-  source(paste0(home_dir, "all_massPix.R"))
+  source(paste0(home_dir, "all_masspix.R"))
 })
 
 ## ==== Pre-processing ====
@@ -310,10 +310,10 @@ lookup_mod <- read[, 2:ncol(read)]
 row.names(lookup_mod) <- read[, 1]
 
 #' parsing the data and getting x and y dimensions
-.jinit()
-.jaddClassPath(path = imzMLparse)
+rJava::.jinit()
+rJava::.jaddClassPath(path = imzMLparse)
 
-imzML <- J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
+imzML <- rJava::J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
 #' wl-07-11-2017, Tue: Location opt$ibd_file is also written into imzML.
 #' Note that opt$imzML_file and opt$ibd_file must have the same file name
 #' and extention names imzML and ibd, respectively. You can see this from
@@ -330,8 +330,8 @@ imzML <- J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
 #' imzMLConverter will get ibd file implicitely based on the directory and
 #' name of imzML file.
 
-x.cood <- J(imzML, "getWidth")
-y.cood <- J(imzML, "getHeight")
+x.cood <- rJava::J(imzML, "getWidth")
+y.cood <- rJava::J(imzML, "getHeight")
 
 ## ==== Main Process ====
 
