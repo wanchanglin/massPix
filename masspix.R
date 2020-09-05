@@ -28,7 +28,7 @@ rm(list = ls(all = T))
 set.seed(123)
 
 #' flag for command-line use or not. If false, only for debug interactively.
-com_f <- F
+com_f <- T
 
 #' galaxy will stop even if R has warning message
 options(warn = -1) #' disable R warning. Turn back: options(warn=0)

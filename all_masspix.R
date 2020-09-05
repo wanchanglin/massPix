@@ -168,7 +168,8 @@ makelibrary <- function(ionisation_mode, sel.class, fixed = F, fixed_FA,
       for (i in 1:ncol(s1)) {
         s1["totalmass", i] <-
           as.numeric(s1["massofFAs", i]) +
-          as.numeric(as.character(lookup_lipid_class[lipidclass, "headgroup_mass"])) -
+          as.numeric(as.character(lookup_lipid_class[lipidclass,
+                                  "headgroup_mass"])) -
           (as.numeric(lookup_lipid_class[lipidclass, "FA_number"]) *
            as.numeric(lookup_element["H", "mass"]))
       }
@@ -254,9 +255,12 @@ makelibrary <- function(ionisation_mode, sel.class, fixed = F, fixed_FA,
 #' multiple files processing in devleopment, at the moment one file at a time
 #' @param spectra_dir Defines the path to the spectral files
 #' @param imzMLparse path to imzMLConverter
-#' @param thres.int Defines if intensity threshold, above which ions are retained
-#' @param thres.low Defines the minumum m/z threshold, above which ions will be retained
-#' @param thres.high Defines the minumum m/z threshold, below which ions will be retained
+#' @param thres.int Defines if intensity threshold, above which ions are
+#'   retained
+#' @param thres.low Defines the minumum m/z threshold, above which ions will be
+#'   retained
+#' @param thres.high Defines the minumum m/z threshold, below which ions will be
+#'   retained
 #' @return List containing two elements. The first is a numeric vector
 #' containing of all unique masses, the second a list of height, width and
 #' height.width in pixels for each file.
@@ -269,8 +273,8 @@ mzextractor <- function(files, imzMLparse, thres.int = 10000,
   cat("\nStarting mzextractor...\n")
 
   #' load parse and java
-  rJava::jinit()
-  rJava::jaddClassPath(path = imzMLparse)
+  rJava::.jinit()
+  rJava::.jaddClassPath(path = imzMLparse)
 
   sizes <- list()
   all.mzs <- vector()
@@ -303,7 +307,8 @@ mzextractor <- function(files, imzMLparse, thres.int = 10000,
         print(paste(marker, "% complete", sep = ""))
       }
     }
-    print(paste("mzs from", size, "spectra in", files[a], "now read.", sep = " "))
+    print(paste("mzs from", size, "spectra in", files[a], "now read.",
+                sep = " "))
   } #' end of reading in files
 
   final.size <- 0
@@ -350,10 +355,12 @@ peakpicker.bin <- function(extracted, bin.ppm = 12) {
     ## group ions into common bin
     result <-
       spectra[spectra[, 1] >= spectra[i, 1] &
-              spectra[, 1] <= (spectra[i, 1] + (bin.ppm * spectra[i, 1]) / 1000000), ]
+              spectra[, 1] <= (spectra[i, 1] +
+                               (bin.ppm * spectra[i, 1]) / 1000000), ]
 
     if (class(result) == "matrix" & spectra[i, "bin.med"] == 0) {
-      spectra[i:(i + nrow(result) - 1), 2] <- round(median(result[, 1]), digits = 4)
+      spectra[i:(i + nrow(result) - 1), 2] <-
+        round(median(result[, 1]), digits = 4)
       i <- i + nrow(result)
     }
     #' if single ion in bin, label with it's m/z
@@ -417,8 +424,8 @@ subsetImage <- function(extracted, peaks, percentage.deiso = 3,
   cat("\nMaking image subset...\n")
 
   #' R parser
-  rJava::jinit()
-  rJava::jaddClassPath(path = imzMLparse)
+  rJava::.jinit()
+  rJava::.jaddClassPath(path = imzMLparse)
 
   sizes <- extracted[[2]]
   bin.spectra <- peaks[[1]]
@@ -449,7 +456,8 @@ subsetImage <- function(extracted, peaks, percentage.deiso = 3,
     }
 
     #' i is height, j is width
-    spectrum <- rJava::J(imzML, "getSpectrum", as.integer(cols), as.integer(rows + 1))
+    spectrum <-
+      rJava::J(imzML, "getSpectrum", as.integer(cols), as.integer(rows + 1))
     mzs <- rJava::J(spectrum, "getmzArray")
     counts <- rJava::J(spectrum, "getIntensityArray")
 
@@ -498,7 +506,9 @@ filter <- function(imagedata.in, steps = seq(0, 1, 0.05), thres.filter = 11,
                    offset = 4) {
   cat("\nStarting filter\n")
   zeros <-
-    zeroperrow(steps, as.matrix(imagedata.in[, (offset + 1):ncol(imagedata.in)]))
+    zeroperrow(steps,
+               as.matrix(imagedata.in[, (offset + 1):ncol(imagedata.in)]))
+
   image.filtered <- imagedata.in[zeros[[thres.filter]], ]
   return(image.filtered)
 }
@@ -584,13 +594,17 @@ deisotope <- function(ppm = 3, no_isotopes = 2, prop.1 = 0.9, prop.2 = 0.5,
     result_3 <- vector()
     if (search.mod != F) {
       for (j in 1:nrow(lookup_mod)) {
-        if (mod[which(lookup_mod[j, "type"] == rownames(as.data.frame(mod)))] == T) {
+        if (mod[which(lookup_mod[j, "type"] ==
+                      rownames(as.data.frame(mod)))] == T) {
           #' find isotope with ppm filter on isotpe
           search <- round(mass + lookup_mod[j, "mass"], digits = 3)
           top <- search + offset
           bottom <- search - offset
-          if (0 != length(spectra[spectra[, 1] >= bottom & spectra[, 1] <= top, ])) {
-            temp.hits <- rbind(spectra[spectra[, 1] >= bottom & spectra[, 1] <= top, ])
+
+          if (0 != length(spectra[spectra[, 1] >=
+                                  bottom & spectra[, 1] <= top, ])) {
+            temp.hits <-
+              rbind(spectra[spectra[, 1] >= bottom & spectra[, 1] <= top, ])
             for (l in 1:nrow(temp.hits)) {
               res_3_temp <-
                 c(temp.hits[l, 1],
@@ -702,7 +716,8 @@ annotate <- function(ionisation_mode, deisotoped, ppm.annotate = 10, dbase) {
     top <- search + offset
     bottom <- search - offset
     result <-
-      which(s1[sel.adducts, ] >= bottom & s1[sel.adducts, ] <= top, arr.ind = TRUE)
+      which(s1[sel.adducts, ] >= bottom &
+            s1[sel.adducts, ] <= top, arr.ind = TRUE)
     if (nrow(result) > 0) {
       for (j in 1:nrow(result)) {
         col <- result[j, "col"]
@@ -776,10 +791,6 @@ annotate <- function(ionisation_mode, deisotoped, ppm.annotate = 10, dbase) {
       }
     }
 
-    #' image.roi<-cbind(image.roi[,2:ncol(image.roi)])
-    #' vresults<-cbind(annotations[,2], image.roi[,1],image.roi[,2:ncol(image.roi)])
-    #' colnames(image)<-c("annoation","modification","bin.mz", files)
-
     summary <- paste(length(annotations[annotations[, 2] != "", 2]),
       "from", length(as.vector(deisotoped[[2]]$mz.obs)),
       "monoisotopic peaks were annoated (using accuract mass) with a",
@@ -829,8 +840,8 @@ contructImage <- function(extracted, deisotoped, peaks, imzMLparse,
                           thres.high = 1000, files) {
   cat("\nStarting 'constructImage'...\n")
 
-  rJava::jinit()
-  rJava::jaddClassPath(path = imzMLparse)
+  rJava::.jinit()
+  rJava::.jaddClassPath(path = imzMLparse)
 
   sizes <- extracted[[2]]
   final.size <- 0
@@ -867,9 +878,11 @@ contructImage <- function(extracted, deisotoped, peaks, imzMLparse,
         if (length(f.scan) > 0) {
           for (k in 1:nrow(f.scan)) {
             bin.group <-
-              bin.spectra[which(f.scan[k, 1] == bin.spectra[, 1], arr.ind = T), 2]
+              bin.spectra[which(f.scan[k, 1] == bin.spectra[, 1],
+                                arr.ind = T), 2]
             if (length(bin.group) > 0) {
-              image[which(image[, 1] == bin.group), ((i - 1) * width) + (j + 1)] <-
+              image[which(image[, 1] == bin.group), ((i - 1) * width) +
+                                                    (j + 1)] <-
                 as.numeric(f.scan[k, "counts"])
             }
           }
@@ -947,18 +960,10 @@ normalise <- function(imagedata.in = image.ann, norm.type = "TIC",
 #'   x <- cbind(x1=3, x2=c(4:1, 2:5))
 #'   stopifnot(all.equal(rowMeans(x), rowMedians(x)))
 norm.median <- function(imagedata.in, offset) {
-  if (F) {
-    library(Biobase)
-    medians.1 <-
-      as.vector(rowMedians(t(as.matrix(imagedata.in[, (offset + 1):ncol(imagedata.in)],
-                                       na.rm = T))))
-    ## wl-29-01-2018, Mon: The parentheses for `na.rm = T` is wrong.
-  } else {
-    #' wl-29-01-2018, Mon: Do not use `rowMedians` in `Biobase`.
-    tmp <- t(as.matrix(imagedata.in[, (offset + 1):ncol(imagedata.in)]))
-    medians <- apply(tmp, MARGIN = 1, FUN = median, na.rm = TRUE)
-    medians <- as.vector(medians)
-  }
+  #' wl-29-01-2018, Mon: Do not use `rowMedians` in `Biobase`.
+  tmp <- t(as.matrix(imagedata.in[, (offset + 1):ncol(imagedata.in)]))
+  medians <- apply(tmp, MARGIN = 1, FUN = median, na.rm = TRUE)
+  medians <- as.vector(medians)
 
   factor <- medians / mean(medians)
   image.norm <-
@@ -967,7 +972,8 @@ norm.median <- function(imagedata.in, offset) {
   empty.spectra <- which(factor == 0, arr.ind = TRUE)
   if (length(empty.spectra) > 1) {
     for (i in 1:length(empty.spectra)) {
-      for (j in 1:nrow(image.norm)) image.norm[j, empty.spectra[i] + offset] <- 0
+      for (j in 1:nrow(image.norm))
+        image.norm[j, empty.spectra[i] + offset] <- 0
     }
   }
   image.norm <-
@@ -981,7 +987,8 @@ norm.median <- function(imagedata.in, offset) {
 #' Normalise data to standards
 #' @param imagedata.in Product of 'constructImage' function.
 #' @param offset number of columns that preceed image data
-#' @param standards vector of row indices corresponding to variables that are standards.
+#' @param standards vector of row indices corresponding to variables that are
+#'   standards.
 #' @export
 #' wl-30-01-2018, Tue: modify and debug
 norm.standards <- function(imagedata.in, offset, standards = NULL) {
@@ -989,7 +996,8 @@ norm.standards <- function(imagedata.in, offset, standards = NULL) {
   #' wl-30-01-2018, Tue: do not plot too many boxplots
   if (F) {
     for (i in 1:length(standards))
-      boxplot(as.vector(t(imagedata.in[standards[i], (offset + 1):length(imagedata.in)])),
+      boxplot(as.vector(t(imagedata.in[standards[i], (offset + 1):
+                                                     length(imagedata.in)])),
         main = paste("distribution of standard",
           imagedata.in[standards[i], 1], ".",
           sep = " "
@@ -1002,7 +1010,8 @@ norm.standards <- function(imagedata.in, offset, standards = NULL) {
     standards <- 1:nrow(imagedata.in)
   }
 
-  av <- mean(colMeans(imagedata.in[standards, (offset + 1):length(imagedata.in)]))
+  av <- mean(colMeans(imagedata.in[standards, (offset + 1):
+                                              length(imagedata.in)]))
   norm <- t(imagedata.in[, (offset + 1):ncol(imagedata.in)]) /
     colMeans(imagedata.in[standards, (offset + 1):length(imagedata.in)])
 
@@ -1032,7 +1041,8 @@ norm.TIC <- function(imagedata.in, offset) {
   empty.spectra <- which(factor == 0, arr.ind = TRUE)
   if (length(empty.spectra) > 0) {
     for (i in 1:length(empty.spectra)) {
-      for (j in 1:nrow(image.norm)) image.norm[j, empty.spectra[i] + offset] <- 0
+      for (j in 1:nrow(image.norm))
+        image.norm[j, empty.spectra[i] + offset] <- 0
     }
   }
   image.norm <- cbind(
@@ -1086,8 +1096,8 @@ rescale <- function(x, scale) {
 #' @param offset number of columns that precede image data
 #' @return Centred, scaled, transformed dataframe containing image data.
 #' @export
-centreScale <- function(imagedata.in = image.ann, scale.type = "cs", transform = F,
-                        offset = 4) {
+centreScale <- function(imagedata.in = image.ann, scale.type = "cs",
+                        transform = F, offset = 4) {
   #' matrix of non-transformed data
   if (transform == F) {
     matr <- as.matrix(imagedata.in[, (offset + 1):ncol(imagedata.in)])
@@ -1098,21 +1108,23 @@ centreScale <- function(imagedata.in = image.ann, scale.type = "cs", transform =
     #' log of 0 causes -inf values so +1..zeros (missing values) become 0
   }
 
-  matr[matr == 0] <- NA # replace zeros for NA so they are ommited from center and scaling
-
+  matr[matr == 0] <- NA
+  #' replace zeros for NA so they are ommited from center and scaling
 
   if (scale.type == "c") {
     matr <- as.matrix(log(imagedata.in[, (offset + 1):ncol(imagedata.in)] + 1))
-    #' log of 0 causes -inf values so +1..zeros (missing values) become 0     }
+    #' log of 0 causes -inf values so +1..zeros (missing values) become 0
   }
   if (scale.type == "cs") {
     matr <- t(scale(t(matr), center = TRUE,
-                    scale = apply(t(matr), 2, function(x) sqrt(sd(x, na.rm = TRUE)))))
+                    scale = apply(t(matr), 2,
+                                  function(x) sqrt(sd(x, na.rm = TRUE)))))
     #' mean center and pareto scale
   }
   if (scale.type == "pareto") {
     matr <- t(scale(t(matr), center = FALSE,
-                    scale = apply(t(matr), 2, function(x) sqrt(sd(x, na.rm = TRUE)))))
+                    scale = apply(t(matr), 2,
+                                  function(x) sqrt(sd(x, na.rm = TRUE)))))
     #' pareto scale only for slicing=T
   }
   if (scale.type == "none") {
@@ -1180,7 +1192,8 @@ zeroperrow <- function(steps, matrix, plot.f = FALSE) {
 #' @param y.cood height of image.
 #' @param nlevels Graduations of colour scale.
 #' @param res.spatial spatial resolution of image
-#' @param rem.outliers Remove intensities that are outliers, valid arguments: "only", "true".
+#' @param rem.outliers Remove intensities that are outliers, valid arguments:
+#'   "only", "true".
 #' @param summary T/F
 #' @param title show titles, T/F".
 #' @return heatmap image
@@ -1262,7 +1275,8 @@ imageSlice <- function(row, imagedata.in, scale, x.cood, y.cood, nlevels, name,
                        subname, offset, res.spatial, rem.outliers, summary,
                        title = T) {
   slice <-
-    as.numeric(as.vector(as.matrix(imagedata.in[row, (1 + offset):ncol(imagedata.in)])))
+    as.numeric(as.vector(as.matrix(imagedata.in[row, (1 + offset):
+                                                     ncol(imagedata.in)])))
   #' wl-24-08-2017: take intensity for one m/z. (1+offset):ncol(imagedata.in)
   #' is for only numeric values.
 
@@ -1275,7 +1289,8 @@ imageSlice <- function(row, imagedata.in, scale, x.cood, y.cood, nlevels, name,
               cex.main = 1)
 
       hist(slice,
-           breaks <- seq(min(slice), max(slice), (max(slice) - min(slice)) / 100),
+           breaks <- seq(min(slice), max(slice), (max(slice) -
+                                                  min(slice)) / 100),
            prob = T,
            main = paste("distribution with 'outliers' for",
                         imagedata.in[row, 1], ".", sep = " "),
@@ -1315,7 +1330,8 @@ imageSlice <- function(row, imagedata.in, scale, x.cood, y.cood, nlevels, name,
                            imagedata.in[row, 1], ".", sep = " "),
               cex.main = 1)
       hist(slice,
-           breaks <- seq(min(slice), max(slice), (max(slice) - min(slice)) / 100),
+           breaks <- seq(min(slice), max(slice), (max(slice) -
+                                                  min(slice)) / 100),
            prob = T,
            main = paste("distribution without 'outliers' for",
                         imagedata.in[row, 1], ".", sep = " "),
@@ -1375,7 +1391,8 @@ cluster <- function(cluster.type = cluster.type, imagedata.in = imagedata.in,
     k.matrix <- matrix(k$cluster, nrow = height, ncol = width, byrow = T)
     t.k.matrix <- t(k.matrix)
 
-    #' plot the heatmap, choose colour scheme and colour according to cluster class
+    #' plot the heatmap, choose colour scheme and colour according to cluster
+    #class
     filled.contour(
       x = seq(1, width, length = width) * res.spatial,
       y = seq(1, height, length = height) * res.spatial,
@@ -1415,7 +1432,8 @@ cluster <- function(cluster.type = cluster.type, imagedata.in = imagedata.in,
       #' plot.
 
       one.cluster <- t.k.matrix
-      one.cluster[one.cluster[, ] != i] <- 0 #' wl-24-08-2017: remove other clusters.
+      one.cluster[one.cluster[, ] != i] <- 0
+      #' wl-24-08-2017: remove other clusters.
 
       filled.contour(
         x = seq(1, width, length = width) * res.spatial,
