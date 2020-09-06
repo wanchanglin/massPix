@@ -97,7 +97,7 @@ if (com_f) {
     #' make library
     make_option("--ionisation_mode", type = "character", default = "positive"),
     make_option("--fixed", type = "logical", default = FALSE),
-    make_option("--fixed_FA", type = "double", default = 16),
+    make_option("--fixed_fa", type = "double", default = 16),
 
     #' mz_extractor
     make_option("--thres_int", type = "integer", default = 100000),
@@ -134,7 +134,7 @@ if (com_f) {
 
     #' output parameters and files
     make_option("--image_out",
-      type = "character", default = "image.tsv",
+      type = "character", default = "image_tsv",
       help = "Processed imaging data visualisation"
     ),
 
@@ -196,7 +196,7 @@ if (com_f) {
     #' make library
     ionisation_mode = "positive",
     fixed = FALSE,
-    fixed_FA = 16,
+    fixed_fa = 16,
     #' mz_extractor
     thres_int = 100000,
     thres_low = 200,
@@ -222,7 +222,7 @@ if (com_f) {
     standards = "NULL",
 
     #' output parameters and files
-    image_out = paste0(home_dir, "test-data/res/deb_image.tsv"),
+    image_out = paste0(home_dir, "test-data/res/deb_image_tsv"),
 
     rdata = TRUE,
     rdata_out = paste0(home_dir, "test-data/res/deb_r_running.rdata"),
@@ -289,10 +289,10 @@ if (!opt$process) {
 }
 
 #' read in library files
-read <- read.csv(paste(lib_dir, "lib_FA.csv", sep = "/"), sep = ",", 
+read <- read.csv(paste(lib_dir, "lib_fa.csv", sep = "/"), sep = ",", 
                  header = T)
-lookup_FA <- read[, 2:4]
-row.names(lookup_FA) <- read[, 1]
+lookup_fa <- read[, 2:4]
+row.names(lookup_fa) <- read[, 1]
 
 read <- read.csv(paste(lib_dir, "lib_class.csv", sep = "/"), sep = ",", 
                  header = T)
@@ -339,10 +339,10 @@ if (opt$process) {
   #' make library
   dbase <- makelibrary(
     ionisation_mode = opt$ionisation_mode,
-    sel.class = NULL, fixed = opt$fixed,
-    fixed_FA = opt$fixed_FA,
+    sel_class = NULL, fixed = opt$fixed,
+    fixed_fa = opt$fixed_fa,
     lookup_lipid_class = lookup_lipid_class,
-    lookup_FA = lookup_FA,
+    lookup_fa = lookup_fa,
     lookup_element = lookup_element
   )
 
@@ -350,31 +350,31 @@ if (opt$process) {
   extracted <- mzextractor(
     files = opt$imzML,
     imzMLparse = imzMLparse,
-    thres.int = opt$thres_int,
-    thres.low = opt$thres_low,
-    thres.high = opt$thres_high
+    thres_int = opt$thres_int,
+    thres_low = opt$thres_low,
+    thres_high = opt$thres_high
   )
 
   #' Bin all m/zs by ppm bucket
-  peaks <- peakpicker.bin(extracted = extracted, bin.ppm = opt$bin_ppm)
+  peaks <- peakpicker_bin(extracted = extracted, bin_ppm = opt$bin_ppm)
 
   #' Generate subset of first image file to improve speed of deisotoping
   temp.image <- subsetImage(
     extracted = extracted, peaks = peaks,
     percentage.deiso = opt$percentage_deiso,
-    thres.int = opt$thres_int,
-    thres.low = opt$thres_low,
-    thres.high = opt$thres_high,
+    thres_int = opt$thres_int,
+    thres_low = opt$thres_low,
+    thres_high = opt$thres_high,
     files = opt$imzML,
     imzMLparse = imzMLparse
   )
 
   #' Filter to a matrix subset that includes variables above a threshold of
   #' missing values
-  temp.image.filtered <- filter(
-    imagedata.in = temp.image,
+  temp.image_filtered <- filter(
+    imagedata_in = temp.image,
     steps = seq(0, 1, opt$steps),
-    thres.filter = opt$thres_filter,
+    thres_filter = opt$thres_filter,
     offset = 1
   )
 
@@ -382,8 +382,8 @@ if (opt$process) {
   deisotoped <- deisotope(
     ppm = opt$ppm, no_isotopes = opt$no_isotopes,
     prop.1 = opt$prop_1, prop.2 = opt$prop_2,
-    peaks = list("", temp.image.filtered[, 1]),
-    image.sub = temp.image.filtered,
+    peaks = list("", temp.image_filtered[, 1]),
+    image_sub = temp.image_filtered,
     search.mod = opt$search_mod,
     mod = eval(parse(text = opt$mod)),
     lookup_mod = lookup_mod
@@ -393,51 +393,51 @@ if (opt$process) {
   annotated <- annotate(
     ionisation_mode = opt$ionisation_mode,
     deisotoped = deisotoped,
-    ppm.annotate = opt$ppm_annotate,
+    ppm_annotate = opt$ppm_annotate,
     dbase = dbase
   )
 
   #' make full image and add lipid ids
   #' wl-23-08-2017: it takes **LONG TIME**.
-  final.image <- contructImage(
+  final_image <- contructImage(
     extracted = extracted,
     deisotoped = deisotoped,
     peaks = peaks, imzMLparse = imzMLparse,
-    thres.int = opt$thres_int,
-    thres.low = opt$thres_low,
-    thres.high = opt$thres_high,
+    thres_int = opt$thres_int,
+    thres_low = opt$thres_low,
+    thres_high = opt$thres_high,
     files = opt$imzML
   )
 
   ids <- cbind(deisotoped[[2]][, 1], annotated, deisotoped[[2]][, 3:4])
 
   #' Create annotated image
-  image.ann <- cbind(ids, final.image[, 2:ncol(final.image)])
+  image_ann <- cbind(ids, final_image[, 2:ncol(final_image)])
 
   #' Normalise image
-  image.norm <- normalise(
-    imagedata.in = image.ann,
+  image_norm <- normalise(
+    imagedata_in = image_ann,
     norm.type = opt$norm_type,
     standards = eval(parse(text = opt$standards)),
     offset = 4
   )
 
   #' wl-12-02-2018, Mon: change the first column name
-  colnames(image.norm)[1] <- "peak"
+  colnames(image_norm)[1] <- "peak"
 
   #' save processed results
-  #' write.csv(image.norm, file=opt$image_out, row.names = FALSE)
-  write.table(image.norm, file = opt$image_out, sep = "\t", row.names = FALSE)
+  #' write.csv(image_norm, file=opt$image_out, row.names = FALSE)
+  write.table(image_norm, file = opt$image_out, sep = "\t", row.names = FALSE)
 
   #' save to rda for debug
   if (opt$rdata) {
-    save(image.norm, image.ann, final.image, annotated, deisotoped,
-      temp.image.filtered, temp.image, peaks, extracted, dbase,
+    save(image_norm, image_ann, final_image, annotated, deisotoped,
+      temp.image_filtered, temp.image, peaks, extracted, dbase,
       file = opt$rdata_out
     )
   }
 } else {
-  image.norm <- read.table(opt$image_file,
+  image_norm <- read.table(opt$image_file,
     sep = "\t", header = TRUE,
     na.strings = "", stringsAsFactors = T
   )
@@ -447,8 +447,8 @@ if (opt$process) {
 ## ==== Perform PCA if requested ====
 
 if (opt$pca) {
-  image.scale <- centreScale(
-    imagedata.in = image.norm,
+  image_scale <- centreScale(
+    imagedata_in = image_norm,
     scale.type = opt$scale_type,
     transform = opt$transform,
     offset = 4
@@ -456,21 +456,21 @@ if (opt$pca) {
 
   pdf(file = opt$pca_out, onefile = T)
   imagePca(
-    imagedata.in = image.scale, offset = 4,
+    imagedata_in = image_scale, offset = 4,
     PCnum = opt$PCnum, scale = opt$scale,
     x.cood = x.cood, y.cood = y.cood,
-    nlevels = opt$nlevels, res.spatial = opt$res_spatial,
+    nlevels = opt$nlevels, res_spatial = opt$res_spatial,
     rem.outliers = opt$rem_outliers,
     summary = opt$summary, title = opt$title
   )
   dev.off()
 
   if (opt$loading) {
-    pca <- princomp(t(image.scale[, (4 + 1):ncol(image.scale)]),
+    pca <- princomp(t(image_scale[, (4 + 1):ncol(image_scale)]),
       cor = FALSE,
       scores = TRUE, covmat = NULL
     )
-    labs.all <- as.numeric(as.vector(image.scale[, 1]))
+    labs.all <- as.numeric(as.vector(image_scale[, 1]))
 
     #' wl-05-02-2018, Mon: save as one excel file
     #' wl-19-08-2020, Wed: drop R package WriteXLS and round loadings.
@@ -497,12 +497,12 @@ if (opt$pca) {
 if (opt$slice) {
   pdf(file = opt$slice_out, onefile = T)
   imageSlice(
-    row = opt$row, imagedata.in = image.norm, scale = opt$scale,
+    row = opt$row, imagedata_in = image_norm, scale = opt$scale,
     x.cood = x.cood, y.cood = y.cood,
     nlevels = opt$nlevels,
-    name = image.norm[opt$row, 1],
-    subname = image.norm[opt$row, 2],
-    offset = 4, res.spatial = opt$res_spatial,
+    name = image_norm[opt$row, 1],
+    subname = image_norm[opt$row, 2],
+    offset = 4, res_spatial = opt$res_spatial,
     rem.outliers = opt$rem_outliers, summary = opt$summary,
     title = opt$title
   )
@@ -515,8 +515,8 @@ if (opt$clus) {
   pdf(file = opt$clus_out, onefile = T)
   intensity <- cluster(
     cluster.type = opt$cluster_type,
-    imagedata.in = image.norm,
-    offset = 4, res.spatial = opt$res_spatial,
+    imagedata_in = image_norm,
+    offset = 4, res_spatial = opt$res_spatial,
     width = x.cood, height = y.cood,
     clusters = opt$clusters
   )
