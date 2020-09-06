@@ -81,7 +81,7 @@ if (com_f) {
     ),
 
     #' input files
-    make_option("--imzML_file",
+    make_option("--imzml_file",
       type = "character",
       help = "Mass spectrometry imaging data to be processed.
               Currently imzML format is supported."
@@ -157,7 +157,7 @@ if (com_f) {
     make_option("--pca_out", type = "character", default = "pca.pdf"),
     make_option("--scale_type", type = "character", default = "cs"),
     make_option("--transform", type = "logical", default = FALSE),
-    make_option("--PCnum", type = "integer", default = 5),
+    make_option("--pc_num", type = "integer", default = 5),
     make_option("--loading", type = "logical", default = TRUE),
     make_option("--loading_out", type = "character", default = "loading.tsv"),
 
@@ -172,7 +172,8 @@ if (com_f) {
     make_option("--cluster_type", type = "character", default = "kmeans"),
     make_option("--clusters", type = "integer", default = 5),
     make_option("--intensity", type = "logical", default = TRUE),
-    make_option("--intensity_out", type = "character", default = "intensity.tsv")
+    make_option("--intensity_out", type = "character",
+                default = "intensity.tsv")
   )
 
   opt <- parse_args(
@@ -186,8 +187,8 @@ if (com_f) {
   opt <- list(
     #' -------------------------------------------------------------------
     #' input files. Note that using full path here.
-    imzML_file = paste0(home_dir, "test-data/cut_masspix.imzML"),
-    ## imzML_file = paste0(home_dir, "test-data/test_pos.imzML"),
+    imzml_file = paste0(home_dir, "test-data/cut_masspix.imzML"),
+    ## imzml_file = paste0(home_dir, "test-data/test_pos.imzML"),
     image_file = paste0(home_dir, "test-data/image_norm.tsv"),
 
     #' image data processing parameters
@@ -240,7 +241,7 @@ if (com_f) {
     pca_out = paste0(home_dir, "test-data/res/deb_pca.pdf"),
     scale_type = "cs",
     transform = FALSE,
-    PCnum = 5,
+    pc_num = 5,
     loading = TRUE,
     loading_out = paste0(home_dir, "test-data/res/deb_loading.tsv"),
 
@@ -268,17 +269,17 @@ suppressPackageStartupMessages({
 
 #' imzML converter
 lib_dir <- paste0(home_dir, "lib/")
-imzMLparse <- paste0(home_dir, "lib/imzMLConverter.jar")
+imzml_parse <- paste0(home_dir, "lib/imzMLConverter.jar")
 
 options(java.parameters = "-Xmx2g")
 
 #' enforce the following required arguments
-if (is.null(opt$imzML_file)) {
-  cat("'imzML_file' is required\n")
+if (is.null(opt$imzml_file)) {
+  cat("'imzml_file' is required\n")
   q(status = 1)
 }
-#' wl-07-02-2018, Wed: 'imzML_file' must be provided no matter what
-#' 'process' is. For 'process' is FALSE, it gives 'x.cood' and 'y.cood' for
+#' wl-07-02-2018, Wed: 'imzml_file' must be provided no matter what
+#' 'process' is. For 'process' is FALSE, it gives 'x_cood' and 'y_cood' for
 #' visualisation.
 
 if (!opt$process) {
@@ -289,49 +290,50 @@ if (!opt$process) {
 }
 
 #' read in library files
-read <- read.csv(paste(lib_dir, "lib_fa.csv", sep = "/"), sep = ",", 
+read <- read.csv(paste(lib_dir, "lib_FA.csv", sep = "/"), sep = ",",
                  header = T)
 lookup_fa <- read[, 2:4]
 row.names(lookup_fa) <- read[, 1]
 
-read <- read.csv(paste(lib_dir, "lib_class.csv", sep = "/"), sep = ",", 
+read <- read.csv(paste(lib_dir, "lib_class.csv", sep = "/"), sep = ",",
                  header = T)
 lookup_lipid_class <- read[, 2:3]
 row.names(lookup_lipid_class) <- read[, 1]
 
-read <- read.csv(paste(lib_dir, "lib_element.csv", sep = "/"), sep = ",", 
+read <- read.csv(paste(lib_dir, "lib_element.csv", sep = "/"), sep = ",",
                  header = T)
 lookup_element <- read[, 2:3]
 row.names(lookup_element) <- read[, 1]
 
-read <- read.csv(paste(lib_dir, "lib_modification.csv", sep = "/"), 
+read <- read.csv(paste(lib_dir, "lib_modification.csv", sep = "/"),
                  sep = ",", header = T)
 lookup_mod <- read[, 2:ncol(read)]
 row.names(lookup_mod) <- read[, 1]
 
 #' parsing the data and getting x and y dimensions
 rJava::.jinit()
-rJava::.jaddClassPath(path = imzMLparse)
+rJava::.jaddClassPath(path = imzml_parse)
 
-imzML <- rJava::J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzML_file)
+imzml <- rJava::J("imzMLConverter.ImzMLHandler")$parseimzML(opt$imzml_file)
 #' wl-07-11-2017, Tue: Location opt$ibd_file is also written into imzML.
-#' Note that opt$imzML_file and opt$ibd_file must have the same file name
+#' Note that opt$imzml_file and opt$ibd_file must have the same file name
 #' and extention names imzML and ibd, respectively. You can see this from
 #' CPP file: (https://goo.gl/WTkFkn)
 #'
 #'  // Remove ".imzML" from the end of the file
-#' 	this->ibdLocation = imzMLFilename.substr(0, imzMLFilename.size()-6) + ".ibd";
+#' 	this->ibdLocation = imzMLFilename.substr(0, imzMLFilename.size()-6) +
+#'                                              ".ibd";
 #'
 #' Otherwise this function: J(spectrum, 'getIntensityArray') does not work.
-#' Three functions mzextractor, subsetImage and contructImage call this
+#' Three functions mzextractor, subset_image and contruct_image call this
 #' function.
 #' wl-25-11-2017, Sat: imzML and ibd file must be uploaded and located in
 #' the same directory. If so, no need to pass ibd file into R code since
 #' imzMLConverter will get ibd file implicitely based on the directory and
 #' name of imzML file.
 
-x.cood <- rJava::J(imzML, "getWidth")
-y.cood <- rJava::J(imzML, "getHeight")
+x_cood <- rJava::J(imzml, "getWidth")
+y_cood <- rJava::J(imzml, "getHeight")
 
 ## ==== Main Process ====
 
@@ -348,8 +350,8 @@ if (opt$process) {
 
   #' Extract m/z and pick peaks
   extracted <- mzextractor(
-    files = opt$imzML,
-    imzMLparse = imzMLparse,
+    files = opt$imzml_file,
+    imzml_parse = imzml_parse,
     thres_int = opt$thres_int,
     thres_low = opt$thres_low,
     thres_high = opt$thres_high
@@ -359,20 +361,20 @@ if (opt$process) {
   peaks <- peakpicker_bin(extracted = extracted, bin_ppm = opt$bin_ppm)
 
   #' Generate subset of first image file to improve speed of deisotoping
-  temp.image <- subsetImage(
+  temp_image <- subset_image(
     extracted = extracted, peaks = peaks,
-    percentage.deiso = opt$percentage_deiso,
+    percentage_deiso = opt$percentage_deiso,
     thres_int = opt$thres_int,
     thres_low = opt$thres_low,
     thres_high = opt$thres_high,
-    files = opt$imzML,
-    imzMLparse = imzMLparse
+    files = opt$imzml_file,
+    imzml_parse = imzml_parse
   )
 
   #' Filter to a matrix subset that includes variables above a threshold of
   #' missing values
-  temp.image_filtered <- filter(
-    imagedata_in = temp.image,
+  temp_image_filtered <- filter(
+    imagedata_in = temp_image,
     steps = seq(0, 1, opt$steps),
     thres_filter = opt$thres_filter,
     offset = 1
@@ -381,9 +383,9 @@ if (opt$process) {
   #' Perform deisotoping on a subset of the image
   deisotoped <- deisotope(
     ppm = opt$ppm, no_isotopes = opt$no_isotopes,
-    prop.1 = opt$prop_1, prop.2 = opt$prop_2,
-    peaks = list("", temp.image_filtered[, 1]),
-    image_sub = temp.image_filtered,
+    prop_1 = opt$prop_1, prop_2 = opt$prop_2,
+    peaks = list("", temp_image_filtered[, 1]),
+    image_sub = temp_image_filtered,
     search.mod = opt$search_mod,
     mod = eval(parse(text = opt$mod)),
     lookup_mod = lookup_mod
@@ -399,14 +401,14 @@ if (opt$process) {
 
   #' make full image and add lipid ids
   #' wl-23-08-2017: it takes **LONG TIME**.
-  final_image <- contructImage(
+  final_image <- contruct_image(
     extracted = extracted,
     deisotoped = deisotoped,
-    peaks = peaks, imzMLparse = imzMLparse,
+    peaks = peaks, imzml_parse = imzml_parse,
     thres_int = opt$thres_int,
     thres_low = opt$thres_low,
     thres_high = opt$thres_high,
-    files = opt$imzML
+    files = opt$imzml_file
   )
 
   ids <- cbind(deisotoped[[2]][, 1], annotated, deisotoped[[2]][, 3:4])
@@ -417,7 +419,7 @@ if (opt$process) {
   #' Normalise image
   image_norm <- normalise(
     imagedata_in = image_ann,
-    norm.type = opt$norm_type,
+    norm_type = opt$norm_type,
     standards = eval(parse(text = opt$standards)),
     offset = 4
   )
@@ -432,7 +434,7 @@ if (opt$process) {
   #' save to rda for debug
   if (opt$rdata) {
     save(image_norm, image_ann, final_image, annotated, deisotoped,
-      temp.image_filtered, temp.image, peaks, extracted, dbase,
+      temp_image_filtered, temp_image, peaks, extracted, dbase,
       file = opt$rdata_out
     )
   }
@@ -447,20 +449,20 @@ if (opt$process) {
 ## ==== Perform PCA if requested ====
 
 if (opt$pca) {
-  image_scale <- centreScale(
+  image_scale <- centre_scale(
     imagedata_in = image_norm,
-    scale.type = opt$scale_type,
+    scale_type = opt$scale_type,
     transform = opt$transform,
     offset = 4
   )
 
   pdf(file = opt$pca_out, onefile = T)
-  imagePca(
+  image_pca(
     imagedata_in = image_scale, offset = 4,
-    PCnum = opt$PCnum, scale = opt$scale,
-    x.cood = x.cood, y.cood = y.cood,
+    pc_num = opt$pc_num, scale = opt$scale,
+    x_cood = x_cood, y_cood = y_cood,
     nlevels = opt$nlevels, res_spatial = opt$res_spatial,
-    rem.outliers = opt$rem_outliers,
+    rem_outliers = opt$rem_outliers,
     summary = opt$summary, title = opt$title
   )
   dev.off()
@@ -470,22 +472,22 @@ if (opt$pca) {
       cor = FALSE,
       scores = TRUE, covmat = NULL
     )
-    labs.all <- as.numeric(as.vector(image_scale[, 1]))
+    labs_all <- as.numeric(as.vector(image_scale[, 1]))
 
     #' wl-05-02-2018, Mon: save as one excel file
     #' wl-19-08-2020, Wed: drop R package WriteXLS and round loadings.
     #' without it, galaxy's 'planemo test' will definitely fail.
-    ld <- lapply(1:opt$PCnum, function(x) {
+    ld <- lapply(1:opt$pc_num, function(x) {
       loadings <- round(pca$loadings[, x], digits = 4)
-      loadings <- cbind(loadings, labs.all)
+      loadings <- cbind(loadings, labs_all)
       loadings <- as.data.frame(loadings)
     })
-    names(ld) <- paste0("PC", 1:opt$PCnum)
+    names(ld) <- paste0("PC", 1:opt$pc_num)
     ## WriteXLS::WriteXLS(ld, ExcelFileName = opt$loading_out, row.names = F,
     ##                    FreezeRow = 1)
 
-    tmp <- lapply(names(ld), function(x){
-      res <- cbind(PC=x, ld[[x]])
+    tmp <- lapply(names(ld), function(x) {
+      res <- cbind(PC = x, ld[[x]])
     })
     tmp <- do.call("rbind", tmp)
     write.table(tmp, file = opt$loading_out, sep = "\t", row.name = FALSE)
@@ -496,14 +498,14 @@ if (opt$pca) {
 
 if (opt$slice) {
   pdf(file = opt$slice_out, onefile = T)
-  imageSlice(
+  image_slice(
     row = opt$row, imagedata_in = image_norm, scale = opt$scale,
-    x.cood = x.cood, y.cood = y.cood,
+    x_cood = x_cood, y_cood = y_cood,
     nlevels = opt$nlevels,
     name = image_norm[opt$row, 1],
     subname = image_norm[opt$row, 2],
     offset = 4, res_spatial = opt$res_spatial,
-    rem.outliers = opt$rem_outliers, summary = opt$summary,
+    rem_outliers = opt$rem_outliers, summary = opt$summary,
     title = opt$title
   )
   dev.off()
@@ -514,10 +516,10 @@ if (opt$slice) {
 if (opt$clus) {
   pdf(file = opt$clus_out, onefile = T)
   intensity <- cluster(
-    cluster.type = opt$cluster_type,
+    cluster_type = opt$cluster_type,
     imagedata_in = image_norm,
     offset = 4, res_spatial = opt$res_spatial,
-    width = x.cood, height = y.cood,
+    width = x_cood, height = y_cood,
     clusters = opt$clusters
   )
   dev.off()
@@ -529,4 +531,3 @@ if (opt$clus) {
     write.table(tmp, file = opt$intensity_out, sep = "\t", row.name = FALSE)
   }
 }
-

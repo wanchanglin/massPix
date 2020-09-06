@@ -5,7 +5,7 @@
 # wl-20-08-2020, Thu: change the  deisotope search mode
 
 Rscript --vanilla ../masspix.R \
-  --imzML_file "../test-data/cut_masspix.imzML" \
+  --imzml_file "../test-data/cut_masspix.imzML" \
   --process TRUE \
   --search_mod TRUE \
   --mod "c(NL = T, label = F, oxidised = T, desat = T)" \
