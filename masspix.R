@@ -62,6 +62,7 @@ if (com_f) {
   func <- function() {
     argv <- commandArgs(trailingOnly = FALSE)
     path <- sub("--file=", "", argv[grep("--file=", argv)])
+    return(path)
   }
   #' prog_name <- basename(func())
   home_dir <- paste0(dirname(func()), "/")
