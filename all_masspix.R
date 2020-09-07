@@ -91,7 +91,7 @@ makelibrary <- function(ionisation_mode, sel_class, fixed = F, fixed_fa,
   )
 
   library <- numeric()
-  for (i in 1:nrow(lookup_lipid_class)) {
+  for (i in seq_len(nrow(lookup_lipid_class))) {
     if (lookup_lipid_class[i, "sel_class"] == T) {
       #' key variables
       rounder <- 3 # number of decimals the rounded masses are rounded to.
@@ -133,7 +133,7 @@ makelibrary <- function(ionisation_mode, sel_class, fixed = F, fixed_fa,
       formula <- vector(mode = "numeric", length = ncol(s1))
       s1 <- rbind(s1, formula)
       #' row.names(s1) <-c("FA1", "FA2","FA3", "mass_fas")
-      for (i in 1:ncol(s1)) {
+      for (i in seq_len(ncol(s1))) {
 
         #' for 3 FAs
         if (fa_num == 3) {
@@ -165,10 +165,10 @@ makelibrary <- function(ionisation_mode, sel_class, fixed = F, fixed_fa,
       totalmass <- vector(mode = "numeric", length = ncol(s1))
       s1 <- rbind(s1, totalmass)
 
-      for (i in 1:ncol(s1)) {
+      for (i in seq_len(ncol(s1))) {
         s1["totalmass", i] <-
           as.numeric(s1["mass_fas", i]) +
-          as.numeric(as.character(lookup_lipid_class[lipidclass, 
+          as.numeric(as.character(lookup_lipid_class[lipidclass,
                                   "headgroup_mass"])) -
           (as.numeric(lookup_lipid_class[lipidclass, "FA_number"]) *
            as.numeric(lookup_element["H", "mass"]))
@@ -186,7 +186,7 @@ makelibrary <- function(ionisation_mode, sel_class, fixed = F, fixed_fa,
                   deprotonated, chlorinated, acetate)
 
       #' calculate charged lipids masses
-      for (i in 1:ncol(s1)) {
+      for (i in seq_len(ncol(s1))) {
         s1["protonated", i] <-
           round((as.numeric(s1["totalmass", i]) +
                  as.numeric(lookup_element["H", "mass"])), digits = 4)
@@ -224,7 +224,7 @@ makelibrary <- function(ionisation_mode, sel_class, fixed = F, fixed_fa,
                   round_acetate)
 
       #' calculate rounded charged lipids masses
-      for (i in 1:ncol(s1)) {
+      for (i in seq_len(ncol(s1))) {
         s1["round_protonated", i] <-
           round(as.numeric(s1["protonated", i]), digits = rounder)
         s1["round_ammoniated", i] <-
@@ -278,7 +278,7 @@ mzextractor <- function(files, imzml_parse, thres_int = 10000,
 
   sizes <- list()
   all_mzs <- vector()
-  for (a in 1:length(files)) {
+  for (a in seq_len(length(files))) {
     imzml <- rJava::J("imzMLConverter.ImzMLHandler")$parseimzML(files[a])
 
     width <- rJava::J(imzml, "getWidth")
@@ -312,7 +312,7 @@ mzextractor <- function(files, imzml_parse, thres_int = 10000,
   } #' end of reading in files
 
   final_size <- 0
-  for (a in 1:length(sizes))
+  for (a in seq_len(length(sizes)))
     final_size <- final_size + as.numeric(sizes[[a]][3])
 
   mz <- all_mzs[, 1]
@@ -430,7 +430,7 @@ subset_image <- function(extracted, peaks, percentage_deiso = 3,
   sizes <- extracted[[2]]
   bin_spectra <- peaks[[1]]
   finalmz <- peaks[[2]]
-  file <- sample(1:length(sizes), 1, replace = F, prob = NULL)
+  file <- sample(seq_len(length(sizes)), 1, replace = F, prob = NULL)
 
   #' wl-24-11-2017, Fri: change again
   imzml <- rJava::J("imzMLConverter.ImzMLHandler")$parseimzML(files[file])
@@ -445,7 +445,7 @@ subset_image <- function(extracted, peaks, percentage_deiso = 3,
     ncol = length(subset)
   ))
   marker <- 0
-  for (n in 1:length(subset)) {
+  for (n in seq_len(length(subset))) {
     remainder <- subset[n]
     rows <- floor(remainder / as.numeric(sizes[[file]][2]))
     cols <- remainder - (rows * as.numeric(sizes[[file]][2]))
@@ -468,7 +468,7 @@ subset_image <- function(extracted, peaks, percentage_deiso = 3,
            scan[, 1] < thres_high, , drop = FALSE]
 
     if (length(f_scan) > 0) {
-      for (k in 1:nrow(f_scan)) {
+      for (k in seq_len(nrow(f_scan))) {
         bin_group <-
           bin_spectra[which(f_scan[k, 1] == bin_spectra[, 1], arr.ind = T), 2]
         if (length(bin_group) > 0) {
@@ -558,7 +558,7 @@ deisotope <- function(ppm = 3, no_isotopes = 2, prop_1 = 0.9, prop_2 = 0.5,
   m <- 0
 
   #' run loop to find isotopes for each ion.
-  for (i in (1:nrow(spectra) - 1)) {
+  for (i in (seq_len(nrow(spectra)) - 1)) {
     #' values of search
     mass <- as.numeric(spectra[i, 1])
     intensity <- as.numeric(spectra[i, 2])
@@ -593,7 +593,7 @@ deisotope <- function(ppm = 3, no_isotopes = 2, prop_1 = 0.9, prop_2 = 0.5,
 
     result_3 <- vector()
     if (search.mod != F) {
-      for (j in 1:nrow(lookup_mod)) {
+      for (j in seq_len(nrow(lookup_mod))) {
         if (mod[which(lookup_mod[j, "type"] ==
                       rownames(as.data.frame(mod)))] == T) {
           #' find isotope with ppm filter on isotpe
@@ -605,7 +605,7 @@ deisotope <- function(ppm = 3, no_isotopes = 2, prop_1 = 0.9, prop_2 = 0.5,
                                   bottom & spectra[, 1] <= top, ])) {
             temp_hits <-
               rbind(spectra[spectra[, 1] >= bottom & spectra[, 1] <= top, ])
-            for (l in 1:nrow(temp_hits)) {
+            for (l in seq_len(nrow(temp_hits))) {
               res_3_temp <-
                 c(temp_hits[l, 1],
                   paste(as.vector(lookup_mod[j, "class"]), "(",
@@ -707,10 +707,10 @@ annotate <- function(ionisation_mode, deisotoped, ppm_annotate = 10, dbase) {
   if (ionisation_mode == "negative") {
     adducts <- c(H = F, NH4 = F, Na = F, K = F, dH = T, Cl = T, OAc = F)
   }
-  for (a in 1:length(adducts)) {
+  for (a in seq_len(length(adducts))) {
     if (adducts[a] == T) sel_adducts <- c(sel_adducts, index + a)
   }
-  for (i in 1:nrow(spectra)) {
+  for (i in seq_len(nrow(spectra))) {
     search <- as.numeric(spectra[i, 1])
     offset <- (ppm_annotate * search) / 1000000
     top <- search + offset
@@ -719,7 +719,7 @@ annotate <- function(ionisation_mode, deisotoped, ppm_annotate = 10, dbase) {
       which(s1[sel_adducts, ] >= bottom &
             s1[sel_adducts, ] <= top, arr.ind = TRUE)
     if (nrow(result) > 0) {
-      for (j in 1:nrow(result)) {
+      for (j in seq_len(nrow(result))) {
         col <- result[j, "col"]
         row <- result[j, "row"]
         row <- sel_adducts[row]
@@ -780,10 +780,10 @@ annotate <- function(ionisation_mode, deisotoped, ppm_annotate = 10, dbase) {
 
     ids <- unique.matrix(combined[, c(3, 5, 6)])
     annotations <- cbind(d_finalmz, "")
-    for (i in 1:nrow(annotations)) {
+    for (i in seq_len(nrow(annotations))) {
       result <- which(ids[, 1] == annotations[i, 1], arr.ind = T)
       if (length(result) > 0) {
-        for (j in 1:length(result)) {
+        for (j in seq_len(length(result))) {
           annotations[i, 2] <-
             paste(annotations[i, 2], "[", ids[result[j], "formula"], "+",
                   ids[result[j], "adduct"], "]", sep = "")
@@ -845,7 +845,7 @@ contruct_image <- function(extracted, deisotoped, peaks, imzml_parse,
 
   sizes <- extracted[[2]]
   final_size <- 0
-  for (a in 1:length(sizes))
+  for (a in seq_len(length(sizes)))
     final_size <- final_size + as.numeric(sizes[[a]][3])
 
   bin_spectra <- peaks[[1]]
@@ -856,7 +856,7 @@ contruct_image <- function(extracted, deisotoped, peaks, imzml_parse,
     matrix(0, nrow = length(d_finalmz), ncol = final_size)
   )
 
-  for (a in 1:length(files)) {
+  for (a in seq_len(length(files))) {
     height <- as.numeric(sizes[[a]][1])
     width <- as.numeric(sizes[[a]][2])
 
@@ -876,7 +876,7 @@ contruct_image <- function(extracted, deisotoped, peaks, imzml_parse,
                scan[, 1] < thres_high, , drop = FALSE]
 
         if (length(f_scan) > 0) {
-          for (k in 1:nrow(f_scan)) {
+          for (k in seq_len(nrow(f_scan))) {
             bin_group <-
               bin_spectra[which(f_scan[k, 1] == bin_spectra[, 1],
                                 arr.ind = T), 2]
@@ -952,7 +952,7 @@ normalise <- function(imagedata_in = image_ann, norm_type = "TIC",
 #' -----------------------------------------------------------------------
 #'   set.seed(1)
 #'   x <- rnorm(n=234*543)
-#'   x[sample(1:length(x), size=0.1*length(x))] <- NA
+#'   x[sample(seq_len(length(x)), size=0.1*length(x))] <- NA
 #'   dim(x) <- c(234,543)
 #'   y1 <- rowMedians(x, na.rm=TRUE)
 #'   y2 <- apply(x, MARGIN=1, FUN=median, na.rm=TRUE)
@@ -971,8 +971,8 @@ norm.median <- function(imagedata_in, offset) {
           t(t(imagedata_in[, (offset + 1):ncol(imagedata_in)]) / factor))
   empty_spectra <- which(factor == 0, arr.ind = TRUE)
   if (length(empty_spectra) > 1) {
-    for (i in 1:length(empty_spectra)) {
-      for (j in 1:nrow(image_norm))
+    for (i in seq_len(length(empty_spectra))) {
+      for (j in seq_len(nrow(image_norm)))
         image_norm[j, empty_spectra[i] + offset] <- 0
     }
   }
@@ -995,7 +995,7 @@ norm.standards <- function(imagedata_in, offset, standards = NULL) {
 
   #' wl-30-01-2018, Tue: do not plot too many boxplots
   if (F) {
-    for (i in 1:length(standards))
+    for (i in seq_len(length(standards)))
       boxplot(as.vector(t(imagedata_in[standards[i], (offset + 1):
                                                      length(imagedata_in)])),
         main = paste("distribution of standard",
@@ -1007,7 +1007,7 @@ norm.standards <- function(imagedata_in, offset, standards = NULL) {
 
   #' wl-30-01-2018, Tue: added.
   if (is.null(standards)) {
-    standards <- 1:nrow(imagedata_in)
+    standards <- seq_len(nrow(imagedata_in))
   }
 
   av <- mean(colMeans(imagedata_in[standards, (offset + 1):
@@ -1040,8 +1040,8 @@ norm.TIC <- function(imagedata_in, offset) {
 
   empty_spectra <- which(factor == 0, arr.ind = TRUE)
   if (length(empty_spectra) > 0) {
-    for (i in 1:length(empty_spectra)) {
-      for (j in 1:nrow(image_norm))
+    for (i in seq_len(length(empty_spectra))) {
+      for (j in seq_len(nrow(image_norm)))
         image_norm[j, empty_spectra[i] + offset] <- 0
     }
   }
@@ -1155,7 +1155,7 @@ zeroperrow <- function(steps, matrix, plot.f = FALSE) {
   counter <- 1
   for (threshold in steps) {
     filter <- vector()
-    for (i in 1:nrow(matrix)) {
+    for (i in seq_len(nrow(matrix))) {
       if ((length(which(matrix[i, ] < 1)) / ncol(matrix)) <= threshold)
         filter <- c(filter, i)
     }
@@ -1415,7 +1415,7 @@ cluster <- function(cluster_type = cluster_type, imagedata_in = imagedata_in,
     colnames(k$centers) <- imagedata_in[, 1]
     mz <- as.numeric(colnames(k$centers))
     intensity <- k$centers
-    rownames(intensity) <- paste0("Cluster", 1:nrow(intensity))
+    rownames(intensity) <- paste0("Cluster", seq_len(nrow(intensity)))
 
     for (i in 1:clusters) { #' i = 2
       #' wl-13-02-2018, Tue: move out this loop
