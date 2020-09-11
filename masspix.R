@@ -272,7 +272,7 @@ suppressPackageStartupMessages({
 lib_dir <- paste0(home_dir, "lib/")
 imzml_parse <- paste0(home_dir, "lib/imzMLConverter.jar")
 
-options(java.parameters = "-Xmx2g")
+options(java.parameters = "-Xmx4g")
 
 #' enforce the following required arguments
 if (is.null(opt$imzml_file)) {
